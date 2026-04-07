@@ -1,4 +1,4 @@
-import { BaseDomainException } from '@/shared/domain/exceptions/base-domain.exception';
+import { BaseException } from '@/shared/domain/exceptions/base.exception';
 import { InvalidEnumValueException } from '@/shared/domain/exceptions/value-objects/invalid-enum-value/invalid-enum-value.exception';
 
 describe('InvalidEnumValueException', () => {
@@ -7,7 +7,7 @@ describe('InvalidEnumValueException', () => {
 	it('should be an instance of BaseDomainException', () => {
 		const exception = new InvalidEnumValueException(testMessage);
 
-		expect(exception).toBeInstanceOf(BaseDomainException);
+		expect(exception).toBeInstanceOf(BaseException);
 		expect(exception).toBeInstanceOf(Error);
 	});
 
@@ -23,18 +23,13 @@ describe('InvalidEnumValueException', () => {
 		expect(exception.name).toBe('InvalidEnumValueException');
 	});
 
-	it('should set the domain to ValueObject', () => {
-		const exception = new InvalidEnumValueException(testMessage);
-
-		expect(exception.layer).toBe('Domain');
-	});
 
 	it('should return a detailed message', () => {
 		const exception = new InvalidEnumValueException(testMessage);
 		const detailedMessage = exception.getDetailedMessage();
 
 		expect(detailedMessage).toBe(
-			`[Domain] InvalidEnumValueException: ${testMessage}`,
+			`[InvalidEnumValueException]: ${testMessage}`,
 		);
 	});
 });

@@ -1,4 +1,4 @@
-import { BaseDomainException } from '@/shared/domain/exceptions/base-domain.exception';
+import { BaseException } from '@/shared/domain/exceptions/base.exception';
 import { InvalidEmailException } from '@/shared/domain/exceptions/value-objects/invalid-email/invalid-email.exception';
 
 describe('InvalidEmailException', () => {
@@ -7,7 +7,7 @@ describe('InvalidEmailException', () => {
 	it('should be an instance of BaseDomainException', () => {
 		const exception = new InvalidEmailException(testMessage);
 
-		expect(exception).toBeInstanceOf(BaseDomainException);
+		expect(exception).toBeInstanceOf(BaseException);
 		expect(exception).toBeInstanceOf(Error);
 	});
 
@@ -23,18 +23,13 @@ describe('InvalidEmailException', () => {
 		expect(exception.name).toBe('InvalidEmailException');
 	});
 
-	it('should set the domain to ValueObject', () => {
-		const exception = new InvalidEmailException(testMessage);
-
-		expect(exception.layer).toBe('Domain');
-	});
 
 	it('should return a detailed message', () => {
 		const exception = new InvalidEmailException(testMessage);
 		const detailedMessage = exception.getDetailedMessage();
 
 		expect(detailedMessage).toBe(
-			`[Domain] InvalidEmailException: ${testMessage}`,
+			`[InvalidEmailException]: ${testMessage}`,
 		);
 	});
 });

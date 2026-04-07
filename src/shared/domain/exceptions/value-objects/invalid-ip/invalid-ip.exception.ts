@@ -1,11 +1,10 @@
-import { BaseDomainException } from '@/shared/domain/exceptions/base-domain.exception';
+import { BaseException } from '@/shared/domain/exceptions/base.exception';
 
 /**
  * Invalid IP Exception
  * This exception is thrown when an IP address value is invalid.
  */
-export class InvalidIpException extends BaseDomainException {
-	public readonly domain: string = 'ValueObject';
+export class InvalidIpException extends BaseException {
 
 	constructor(message: string) {
 		super(message);

@@ -1,11 +1,10 @@
-import { BaseDomainException } from '@/shared/domain/exceptions/base-domain.exception';
+import { BaseException } from '@/shared/domain/exceptions/base.exception';
 
 /**
  * Invalid Enum Value Exception
  * This exception is thrown when an enum value is invalid.
  */
-export class InvalidEnumValueException extends BaseDomainException {
-	public readonly domain: string = 'ValueObject';
+export class InvalidEnumValueException extends BaseException {
 
 	constructor(message: string) {
 		super(message);

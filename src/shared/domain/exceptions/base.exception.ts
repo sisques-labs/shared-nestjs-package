@@ -17,7 +17,7 @@ export class BaseException extends Error {
    * @returns A formatted error description
    */
   public getDetailedMessage(): string {
-    return `[${this.name}: ${this.message}`;
+    return `[${this.name}]: ${this.message}`;
   }
 
   /**

@@ -1,4 +1,4 @@
-import { BaseDomainException } from '@/shared/domain/exceptions/base-domain.exception';
+import { BaseException } from '@/shared/domain/exceptions/base.exception';
 import { InvalidLocaleException } from '@/shared/domain/exceptions/value-objects/invalid-locale/invalid-locale.exception';
 
 describe('InvalidLocaleException', () => {
@@ -7,7 +7,7 @@ describe('InvalidLocaleException', () => {
 	it('should be an instance of BaseDomainException', () => {
 		const exception = new InvalidLocaleException(testMessage);
 
-		expect(exception).toBeInstanceOf(BaseDomainException);
+		expect(exception).toBeInstanceOf(BaseException);
 		expect(exception).toBeInstanceOf(Error);
 	});
 
@@ -23,18 +23,13 @@ describe('InvalidLocaleException', () => {
 		expect(exception.name).toBe('InvalidLocaleException');
 	});
 
-	it('should set the domain to Domain (inherited from base)', () => {
-		const exception = new InvalidLocaleException(testMessage);
-
-		expect(exception.layer).toBe('Domain');
-	});
 
 	it('should return a detailed message', () => {
 		const exception = new InvalidLocaleException(testMessage);
 		const detailedMessage = exception.getDetailedMessage();
 
 		expect(detailedMessage).toBe(
-			`[Domain] InvalidLocaleException: ${testMessage}`,
+			`[InvalidLocaleException]: ${testMessage}`,
 		);
 	});
 });

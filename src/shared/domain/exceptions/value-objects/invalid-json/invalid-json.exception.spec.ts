@@ -1,4 +1,4 @@
-import { BaseDomainException } from '@/shared/domain/exceptions/base-domain.exception';
+import { BaseException } from '@/shared/domain/exceptions/base.exception';
 import { InvalidJsonException } from '@/shared/domain/exceptions/value-objects/invalid-json/invalid-json.exception';
 
 describe('InvalidJsonException', () => {
@@ -7,7 +7,7 @@ describe('InvalidJsonException', () => {
 	it('should be an instance of BaseDomainException', () => {
 		const exception = new InvalidJsonException(testMessage);
 
-		expect(exception).toBeInstanceOf(BaseDomainException);
+		expect(exception).toBeInstanceOf(BaseException);
 		expect(exception).toBeInstanceOf(Error);
 	});
 
@@ -23,18 +23,13 @@ describe('InvalidJsonException', () => {
 		expect(exception.name).toBe('InvalidJsonException');
 	});
 
-	it('should set the domain to ValueObject', () => {
-		const exception = new InvalidJsonException(testMessage);
-
-		expect(exception.layer).toBe('Domain');
-	});
 
 	it('should return a detailed message', () => {
 		const exception = new InvalidJsonException(testMessage);
 		const detailedMessage = exception.getDetailedMessage();
 
 		expect(detailedMessage).toBe(
-			`[Domain] InvalidJsonException: ${testMessage}`,
+			`[InvalidJsonException]: ${testMessage}`,
 		);
 	});
 });

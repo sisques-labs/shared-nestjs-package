@@ -1,4 +1,4 @@
-import { BaseDomainException } from '@/shared/domain/exceptions/base-domain.exception';
+import { BaseException } from '@/shared/domain/exceptions/base.exception';
 import { InvalidBooleanException } from '@/shared/domain/exceptions/value-objects/invalid-boolean/invalid-boolean.exception';
 
 describe('InvalidBooleanException', () => {
@@ -7,7 +7,7 @@ describe('InvalidBooleanException', () => {
 	it('should be an instance of BaseDomainException', () => {
 		const exception = new InvalidBooleanException(testMessage);
 
-		expect(exception).toBeInstanceOf(BaseDomainException);
+		expect(exception).toBeInstanceOf(BaseException);
 		expect(exception).toBeInstanceOf(Error);
 	});
 
@@ -23,11 +23,6 @@ describe('InvalidBooleanException', () => {
 		expect(exception.name).toBe('InvalidBooleanException');
 	});
 
-	it('should set the domain to ValueObject', () => {
-		const exception = new InvalidBooleanException(testMessage);
-
-		expect(exception.layer).toBe('Domain');
-	});
 
 	it('should create a timestamp when the exception is created', () => {
 		const beforeCreation = new Date();
@@ -48,7 +43,7 @@ describe('InvalidBooleanException', () => {
 		const detailedMessage = exception.getDetailedMessage();
 
 		expect(detailedMessage).toBe(
-			`[Domain] InvalidBooleanException: ${testMessage}`,
+			`[InvalidBooleanException]: ${testMessage}`,
 		);
 	});
 
@@ -58,7 +53,6 @@ describe('InvalidBooleanException', () => {
 
 		expect(json).toHaveProperty('name', 'InvalidBooleanException');
 		expect(json).toHaveProperty('message', testMessage);
-		expect(json).toHaveProperty('layer', 'Domain');
 		expect(json).toHaveProperty('timestamp');
 		expect(json).toHaveProperty('stack');
 	});

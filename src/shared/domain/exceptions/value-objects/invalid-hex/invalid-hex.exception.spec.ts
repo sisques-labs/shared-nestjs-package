@@ -1,4 +1,4 @@
-import { BaseDomainException } from '@/shared/domain/exceptions/base-domain.exception';
+import { BaseException } from '@/shared/domain/exceptions/base.exception';
 import { InvalidHexException } from '@/shared/domain/exceptions/value-objects/invalid-hex/invalid-hex.exception';
 
 describe('InvalidHexException', () => {
@@ -7,7 +7,7 @@ describe('InvalidHexException', () => {
 	it('should be an instance of BaseDomainException', () => {
 		const exception = new InvalidHexException(testMessage);
 
-		expect(exception).toBeInstanceOf(BaseDomainException);
+		expect(exception).toBeInstanceOf(BaseException);
 		expect(exception).toBeInstanceOf(Error);
 	});
 
@@ -23,18 +23,13 @@ describe('InvalidHexException', () => {
 		expect(exception.name).toBe('InvalidHexException');
 	});
 
-	it('should set the domain to ValueObject', () => {
-		const exception = new InvalidHexException(testMessage);
-
-		expect(exception.layer).toBe('Domain');
-	});
 
 	it('should return a detailed message', () => {
 		const exception = new InvalidHexException(testMessage);
 		const detailedMessage = exception.getDetailedMessage();
 
 		expect(detailedMessage).toBe(
-			`[Domain] InvalidHexException: ${testMessage}`,
+			`[InvalidHexException]: ${testMessage}`,
 		);
 	});
 });

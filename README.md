@@ -1,99 +1,636 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# @sisques-labs/shared-nestjs
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Shared NestJS library providing Domain-Driven Design (DDD) and CQRS building blocks, validated value objects, repository abstractions, and GraphQL utilities for use across microservices and modular monolith projects.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Table of Contents
 
-## Description
+- [Installation](#installation)
+- [Peer Dependencies](#peer-dependencies)
+- [Module Setup](#module-setup)
+- [Domain Layer](#domain-layer)
+  - [Base Aggregate](#base-aggregate)
+  - [Value Objects](#value-objects)
+  - [Domain Identifiers](#domain-identifiers)
+  - [Domain Exceptions](#domain-exceptions)
+  - [Criteria & Pagination](#criteria--pagination)
+  - [Repository Interfaces](#repository-interfaces)
+  - [Factory Interfaces](#factory-interfaces)
+  - [View Models](#view-models)
+  - [Domain Events](#domain-events)
+- [Application Layer](#application-layer)
+  - [Command Handlers](#command-handlers)
+  - [Service Interface](#service-interface)
+- [Infrastructure Layer](#infrastructure-layer)
+  - [MongoDB](#mongodb)
+  - [TypeORM](#typeorm)
+- [Transport Layer (GraphQL)](#transport-layer-graphql)
+  - [Input DTOs](#input-dtos)
+  - [Response DTOs](#response-dtos)
+  - [Mappers](#mappers)
+  - [Complexity Plugin](#complexity-plugin)
+- [Enums](#enums)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
 
-## Project setup
-
-```bash
-$ pnpm install
-```
-
-## Compile and run the project
-
-```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
-```
-
-## Run tests
+## Installation
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+npm install @sisques-labs/shared-nestjs
+# or
+pnpm add @sisques-labs/shared-nestjs
+# or
+yarn add @sisques-labs/shared-nestjs
 ```
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## Peer Dependencies
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Install the peer dependencies for the features you need. All database and GraphQL dependencies are optional.
 
 ```bash
-$ pnpm install -g mau
-$ mau deploy
+# Core NestJS (always required)
+npm install @nestjs/common @nestjs/core reflect-metadata rxjs
+
+# CQRS support
+npm install @nestjs/cqrs
+
+# MongoDB support
+npm install mongodb @nestjs/config
+
+# TypeORM support
+npm install typeorm @nestjs/typeorm @nestjs/config
+
+# GraphQL support
+npm install graphql @nestjs/graphql @nestjs/apollo @apollo/server graphql-query-complexity
+
+# Validation (required for GraphQL DTOs)
+npm install class-validator class-transformer
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## Module Setup
 
-Check out a few resources that may come in handy when working with NestJS:
+Import `SharedModule` into your application module. It is a global module, so its providers (MongoDB and TypeORM services, mappers) are available throughout the application without re-importing.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```typescript
+import { Module } from '@nestjs/common';
+import { SharedModule } from '@sisques-labs/shared-nestjs';
 
-## Support
+@Module({
+  imports: [SharedModule],
+})
+export class AppModule {}
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+`SharedModule` automatically initializes both `MongoModule` and `TypeOrmModule`. Configure them via environment variables or `@nestjs/config` in your app.
 
-## Stay in touch
+---
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## Domain Layer
+
+### Base Aggregate
+
+`BaseAggregate` extends NestJS's `AggregateRoot` and provides `createdAt` and `updatedAt` value objects out of the box. All domain aggregates should extend it.
+
+```typescript
+import { BaseAggregate } from '@sisques-labs/shared-nestjs';
+
+export class UserAggregate extends BaseAggregate {
+  private _email: EmailValueObject;
+
+  constructor(
+    id: UserUuidValueObject,
+    email: EmailValueObject,
+    createdAt: DateValueObject,
+    updatedAt: DateValueObject,
+  ) {
+    super(id, createdAt, updatedAt);
+    this._email = email;
+  }
+}
+```
+
+---
+
+### Value Objects
+
+All value objects are immutable and validate their input on construction, throwing a typed domain exception on invalid data.
+
+#### Basic Scalars
+
+| Class | Description |
+|---|---|
+| `StringValueObject` | String with optional min/max length, pattern, and trim |
+| `NumberValueObject` | Numeric value with validation |
+| `BooleanValueObject` | Boolean wrapper |
+| `DateValueObject` | Date wrapper |
+| `JsonValueObject` | Valid JSON value |
+| `EnumValueObject<T>` | Typed enum wrapper |
+
+#### Format-Specific
+
+| Class | Description |
+|---|---|
+| `EmailValueObject` | RFC 5322 compliant. Methods: `getLocalPart()`, `getDomain()` |
+| `UuidValueObject` | RFC 4122. Methods: `getVersion()`, `isNil()`, static `generate()` |
+| `PhoneValueObject` | E.164 format. Methods: `getCountryCode()`, `toE164()` |
+| `UrlValueObject` | Valid URL |
+| `IpValueObject` | IPv4/IPv6 validation |
+| `HexValueObject` | Hexadecimal string |
+| `ColorValueObject` | Hex, RGB, HSL, and named colors with conversion methods |
+| `SlugValueObject` | URL-friendly slug. Methods: `toHumanReadable()`, `addPrefix()`, `addSuffix()`, static `generateSlug()` |
+| `PasswordValueObject` | Strength scoring, common password detection. Methods: `getStrengthScore()`, `meetsRequirements()` |
+| `LocaleValueObject` | BCP 47 locale (50+ supported). Methods: `getLanguageCode()`, `getCountryCode()`, `getDisplayName()` |
+| `TimezoneValueObject` | IANA timezone |
+| `PhoneCodeValueObject` | Phone dial code |
+| `LengthUnitValueObject` | Unit of length measurement |
+| `DimensionsValueObject` | Width/height dimensions |
+| `NumericRangeValueObject` | Min/max numeric range |
+
+**Usage example:**
+
+```typescript
+import {
+  EmailValueObject,
+  UuidValueObject,
+  PasswordValueObject,
+} from '@sisques-labs/shared-nestjs';
+
+const email = new EmailValueObject('user@example.com');
+console.log(email.getDomain()); // 'example.com'
+
+const id = UuidValueObject.generate();
+console.log(id.getVersion()); // 4
+
+const password = new PasswordValueObject('MyS3cur3P@ss!');
+console.log(password.getStrengthScore()); // number 0-5
+console.log(password.meetsRequirements()); // boolean
+```
+
+---
+
+### Domain Identifiers
+
+Typed UUID wrappers for each aggregate root, all extending `UuidValueObject`.
+
+| Class | Aggregate |
+|---|---|
+| `UserUuidValueObject` | User |
+| `AuthUuidValueObject` | Auth |
+| `PlantUuidValueObject` | Plant |
+| `PlantSpeciesUuidValueObject` | Plant Species |
+| `GrowingUnitUuidValueObject` | Growing Unit |
+| `LocationUuidValueObject` | Location |
+| `OverviewUuidValueObject` | Overview |
+| `SagaInstanceUuidValueObject` | Saga Instance |
+| `SagaStepUuidValueObject` | Saga Step |
+| `SagaLogUuidValueObject` | Saga Log |
+
+---
+
+### Domain Exceptions
+
+`BaseException` is the root exception class. Each value object has a corresponding typed exception thrown on validation failure.
+
+```typescript
+import { BaseException } from '@sisques-labs/shared-nestjs';
+
+// BaseException provides:
+// - timestamp: Date
+// - getDetailedMessage(): string  → "[ClassName]: message"
+// - toJSON(): object
+```
+
+Available typed exceptions (all extend `BaseException`):
+
+`InvalidBooleanException`, `InvalidColorException`, `InvalidDimensionsException`, `InvalidEmailException`, `InvalidEnumValueException`, `InvalidHexException`, `InvalidIpException`, `InvalidJsonException`, `InvalidLocaleException`, `InvalidNumberException`, `InvalidNumericRangeException`, `InvalidPasswordException`, `InvalidPhoneException`, `InvalidStringException`, `InvalidTimezoneException`, `InvalidUrlException`, `InvalidUuidException`
+
+---
+
+### Criteria & Pagination
+
+Use `Criteria` to build type-safe query parameters with filters, sorts, and pagination.
+
+```typescript
+import {
+  Criteria,
+  FilterOperator,
+  SortDirection,
+} from '@sisques-labs/shared-nestjs';
+
+const criteria = new Criteria(
+  [{ field: 'email', operator: FilterOperator.EQUALS, value: 'user@example.com' }],
+  [{ field: 'createdAt', direction: SortDirection.DESC }],
+  { page: 1, perPage: 20 },
+);
+```
+
+`PaginatedResult<T>` wraps paginated query results:
+
+```typescript
+import { PaginatedResult } from '@sisques-labs/shared-nestjs';
+
+// { data: T[], total: number, page: number, perPage: number }
+const result: PaginatedResult<User> = await repository.findByCriteria(criteria);
+```
+
+---
+
+### Repository Interfaces
+
+Implement these interfaces in your infrastructure layer to keep the domain free of database concerns.
+
+```typescript
+import {
+  IBaseReadRepository,
+  IBaseWriteRepository,
+} from '@sisques-labs/shared-nestjs';
+
+// Read side: findById, findByCriteria, save, delete
+interface IUserReadRepository extends IBaseReadRepository<UserAggregate> {}
+
+// Write side: findById, save, delete
+interface IUserWriteRepository extends IBaseWriteRepository<UserAggregate> {}
+```
+
+---
+
+### Factory Interfaces
+
+Factories handle deserialization of aggregates from different sources.
+
+```typescript
+import { IReadFactory, IWriteFactory } from '@sisques-labs/shared-nestjs';
+
+// Read factory: creates view models from aggregates, DTOs, or primitives
+class UserReadFactory implements IReadFactory<UserViewModel, UserAggregate, UserDto> {
+  create(data: UserDto): UserViewModel { ... }
+  fromAggregate(aggregate: UserAggregate): UserViewModel { ... }
+  fromPrimitives(primitives: object): UserViewModel { ... }
+}
+
+// Write factory: creates aggregates from commands or primitives
+class UserWriteFactory implements IWriteFactory<UserAggregate, CreateUserCommand, UserPrimitives> {
+  create(command: CreateUserCommand): UserAggregate { ... }
+  fromPrimitives(primitives: UserPrimitives): UserAggregate { ... }
+}
+```
+
+---
+
+### View Models
+
+`BaseViewModel` provides a base for read-side projections with typed accessors for `id`, `createdAt`, and `updatedAt`.
+
+```typescript
+import { BaseViewModel } from '@sisques-labs/shared-nestjs';
+
+export class UserViewModel extends BaseViewModel {
+  // Inherited: getId(), getCreatedAt(), getUpdatedAt()
+}
+```
+
+---
+
+### Domain Events
+
+`IBaseEventData` and `IEventMetadata` provide a structured shape for domain events with aggregate and entity metadata.
+
+```typescript
+import { IBaseEventData, IEventMetadata } from '@sisques-labs/shared-nestjs';
+
+// IEventMetadata shape:
+// {
+//   aggregateRootId: string;
+//   aggregateRootType: string;
+//   entityId: string;
+//   entityType: string;
+//   eventType: string;
+// }
+```
+
+---
+
+## Application Layer
+
+### Command Handlers
+
+`BaseCommandHandler` integrates the `EventBus` to publish domain events automatically after command execution.
+
+```typescript
+import { BaseCommandHandler } from '@sisques-labs/shared-nestjs';
+import { CommandHandler, EventBus } from '@nestjs/cqrs';
+
+@CommandHandler(CreateUserCommand)
+export class CreateUserCommandHandler extends BaseCommandHandler<CreateUserCommand> {
+  constructor(
+    private readonly repository: IUserWriteRepository,
+    eventBus: EventBus,
+  ) {
+    super(eventBus);
+  }
+
+  async execute(command: CreateUserCommand): Promise<void> {
+    const user = UserWriteFactory.create(command);
+    await this.repository.save(user);
+    this.publishEvents(user); // publishes domain events from the aggregate
+  }
+}
+```
+
+`BaseUpdateCommandHandler` adds utilities to extract changed fields from update commands, useful for partial updates.
+
+---
+
+### Service Interface
+
+`IBaseService` is a marker interface for application services.
+
+```typescript
+import { IBaseService } from '@sisques-labs/shared-nestjs';
+
+@Injectable()
+export class UserService implements IBaseService {}
+```
+
+---
+
+## Infrastructure Layer
+
+### MongoDB
+
+#### Environment Variables
+
+```env
+MONGO_URI=mongodb://localhost:27017
+MONGO_DB_NAME=my_database
+```
+
+#### Base Repository
+
+Extend `BaseMongoMasterRepository` to get filter, sort, and pagination support out of the box.
+
+```typescript
+import {
+  BaseMongoMasterRepository,
+  MongoMasterService,
+  Criteria,
+  PaginatedResult,
+} from '@sisques-labs/shared-nestjs';
+
+@Injectable()
+export class UserMongoRepository extends BaseMongoMasterRepository<UserMongoDto> {
+  constructor(mongoService: MongoMasterService) {
+    super(mongoService, 'users'); // collection name
+  }
+
+  async findByCriteria(criteria: Criteria): Promise<PaginatedResult<UserAggregate>> {
+    return this.executeQueryWithPagination(criteria);
+    // Automatically maps FilterOperator → MongoDB $operators
+    // Applies sorts and pagination (skip/limit)
+  }
+}
+```
+
+`FilterOperator` → MongoDB operator mapping:
+
+| Enum value | MongoDB operator |
+|---|---|
+| `EQUALS` | `$eq` |
+| `NOT_EQUALS` | `$ne` |
+| `LIKE` | `$regex` |
+| `IN` | `$in` |
+| `GT` | `$gt` |
+| `LT` | `$lt` |
+| `GTE` | `$gte` |
+| `LTE` | `$lte` |
+
+#### Base DTO
+
+```typescript
+import { BaseMongoDto } from '@sisques-labs/shared-nestjs';
+
+// Type: { id: string; createdAt: Date; updatedAt: Date }
+type UserMongoDto = BaseMongoDto & {
+  email: string;
+  name: string;
+};
+```
+
+---
+
+### TypeORM
+
+#### Environment Variables
+
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=secret
+DB_DATABASE=my_database
+```
+
+#### Base Entity
+
+```typescript
+import { BaseTypeormEntity } from '@sisques-labs/shared-nestjs';
+import { Entity, Column } from 'typeorm';
+
+@Entity('users')
+export class UserTypeormEntity extends BaseTypeormEntity {
+  // Inherited: id (UUID, primary key), createdAt, updatedAt, deletedAt (soft delete)
+
+  @Column()
+  email: string;
+}
+```
+
+#### Base Repository
+
+```typescript
+import {
+  BaseTypeormMasterRepository,
+  TypeormMasterService,
+} from '@sisques-labs/shared-nestjs';
+
+@Injectable()
+export class UserTypeormRepository extends BaseTypeormMasterRepository {
+  constructor(typeormService: TypeormMasterService) {
+    super(typeormService);
+  }
+
+  async findById(id: string): Promise<UserAggregate | null> {
+    const repo = this.getRepository(UserTypeormEntity);
+    const entity = await repo.findOneBy({ id });
+    return entity ? UserWriteFactory.fromPrimitives(entity) : null;
+  }
+}
+```
+
+#### Base DTO
+
+```typescript
+import { BaseTypeormDto } from '@sisques-labs/shared-nestjs';
+
+// Type: { id: string; createdAt: Date; updatedAt: Date }
+type UserTypeormDto = BaseTypeormDto & {
+  email: string;
+};
+```
+
+---
+
+## Transport Layer (GraphQL)
+
+### Input DTOs
+
+#### `BaseFindByCriteriaInput`
+
+Composite input for list queries combining filters, sorts, and pagination.
+
+```graphql
+query {
+  users(
+    criteria: {
+      filters: [{ field: "email", operator: EQUALS, value: "user@example.com" }]
+      sorts: [{ field: "createdAt", direction: DESC }]
+      pagination: { page: 1, perPage: 20 }
+    }
+  ) {
+    total
+    page
+    perPage
+    totalPages
+    data { id email }
+  }
+}
+```
+
+```typescript
+import { BaseFindByCriteriaInput } from '@sisques-labs/shared-nestjs';
+
+@Resolver()
+export class UserResolver {
+  @Query(() => UsersPaginatedResult)
+  users(@Args('criteria') criteria: BaseFindByCriteriaInput) {
+    return this.userService.findByCriteria(criteria);
+  }
+}
+```
+
+Individual input types: `BaseFilterInput`, `BaseSortInput`, `BasePaginationInput`, `NumericRangeInput`.
+
+---
+
+### Response DTOs
+
+#### `BasePaginatedResultDto`
+
+```typescript
+import { BasePaginatedResultDto } from '@sisques-labs/shared-nestjs';
+import { ObjectType, Field } from '@nestjs/graphql';
+
+@ObjectType()
+export class UsersPaginatedResult extends BasePaginatedResultDto {
+  @Field(() => [UserDto])
+  data: UserDto[];
+  // Inherited: total, page, perPage, totalPages (computed automatically)
+}
+```
+
+#### `MutationResponseDto`
+
+```typescript
+import { MutationResponseDto } from '@sisques-labs/shared-nestjs';
+
+// Shape: { success: boolean; message?: string; id?: string }
+
+@Mutation(() => MutationResponseDto)
+createUser(@Args('input') input: CreateUserInput): Promise<MutationResponseDto> { ... }
+```
+
+#### `MutationResponseArrayDto`
+
+```typescript
+import { MutationResponseArrayDto } from '@sisques-labs/shared-nestjs';
+
+// Shape: { success: boolean; message?: string; ids: string[] }
+
+@Mutation(() => MutationResponseArrayDto)
+deleteUsers(@Args('ids', { type: () => [String] }) ids: string[]): Promise<MutationResponseArrayDto> { ... }
+```
+
+---
+
+### Mappers
+
+`MutationResponseGraphQLMapper` is a NestJS injectable service provided by `SharedModule` that maps domain results to `MutationResponseDto`.
+
+```typescript
+import { MutationResponseGraphQLMapper } from '@sisques-labs/shared-nestjs';
+
+@Resolver()
+export class UserResolver {
+  constructor(private readonly mutationMapper: MutationResponseGraphQLMapper) {}
+
+  @Mutation(() => MutationResponseDto)
+  async createUser(@Args('input') input: CreateUserInput) {
+    const result = await this.commandBus.execute(new CreateUserCommand(input));
+    return this.mutationMapper.map(result);
+  }
+}
+```
+
+---
+
+### Complexity Plugin
+
+`ComplexityPlugin` is an Apollo server plugin provided automatically by `SharedModule`. It validates query complexity on every request and rejects queries exceeding **1000 points**.
+
+To assign complexity weights to fields use the `@Complexity` decorator from `@nestjs/graphql`:
+
+```typescript
+import { Field, ObjectType, Complexity } from '@nestjs/graphql';
+
+@ObjectType()
+export class UserDto {
+  @Field()
+  @Complexity(1)
+  id: string;
+}
+```
+
+---
+
+## Enums
+
+```typescript
+import {
+  FilterOperator,
+  SortDirection,
+  LengthUnitEnum,
+  UserRoleEnum,
+  UserStatusEnum,
+} from '@sisques-labs/shared-nestjs';
+
+FilterOperator.EQUALS     // 'eq'
+FilterOperator.NOT_EQUALS // 'ne'
+FilterOperator.LIKE       // 'like'
+FilterOperator.IN         // 'in'
+FilterOperator.GT         // 'gt'
+FilterOperator.LT         // 'lt'
+FilterOperator.GTE        // 'gte'
+FilterOperator.LTE        // 'lte'
+
+SortDirection.ASC
+SortDirection.DESC
+```
+
+---
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+MIT — [Sisques Labs](https://github.com/JSisques)

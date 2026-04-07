@@ -1,7 +1,6 @@
-import { BaseDomainException } from '@/shared/domain/exceptions/base-domain.exception';
+import { BaseException } from '@/shared/domain/exceptions/base.exception';
 
-export class InvalidNumericRangeException extends BaseDomainException {
-	public readonly domain: string = 'ValueObject';
+export class InvalidNumericRangeException extends BaseException {
 
 	constructor(min: number, max: number) {
 		super(`Range min (${min}) cannot be greater than max (${max})`);

@@ -1,4 +1,4 @@
-import { BaseDomainException } from '@/shared/domain/exceptions/base-domain.exception';
+import { BaseException } from '@/shared/domain/exceptions/base.exception';
 import { InvalidIpException } from '@/shared/domain/exceptions/value-objects/invalid-ip/invalid-ip.exception';
 
 describe('InvalidIpException', () => {
@@ -7,7 +7,7 @@ describe('InvalidIpException', () => {
 	it('should be an instance of BaseDomainException', () => {
 		const exception = new InvalidIpException(testMessage);
 
-		expect(exception).toBeInstanceOf(BaseDomainException);
+		expect(exception).toBeInstanceOf(BaseException);
 		expect(exception).toBeInstanceOf(Error);
 	});
 
@@ -23,16 +23,11 @@ describe('InvalidIpException', () => {
 		expect(exception.name).toBe('InvalidIpException');
 	});
 
-	it('should set the domain to ValueObject', () => {
-		const exception = new InvalidIpException(testMessage);
-
-		expect(exception.layer).toBe('Domain');
-	});
 
 	it('should return a detailed message', () => {
 		const exception = new InvalidIpException(testMessage);
 		const detailedMessage = exception.getDetailedMessage();
 
-		expect(detailedMessage).toBe(`[Domain] InvalidIpException: ${testMessage}`);
+		expect(detailedMessage).toBe(`[InvalidIpException]: ${testMessage}`);
 	});
 });
