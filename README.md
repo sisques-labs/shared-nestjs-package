@@ -37,9 +37,42 @@ Shared NestJS library providing Domain-Driven Design (DDD) and CQRS building blo
 
 ## Publishing
 
-This package is published to **GitHub Packages** under the `@sisques-labs` scope.
+This package is published to **GitHub Packages** under the `@sisques-labs` scope and managed via two GitHub Actions workflows.
 
-### Setup
+| Workflow | File | Trigger |
+|---|---|---|
+| **CI** | `.github/workflows/ci.yml` | Every push to `main` and every PR |
+| **Release** | `.github/workflows/release.yml` | Manual (`workflow_dispatch`) |
+
+### CI Workflow
+
+Runs automatically on every push to `main` and on every pull request. Executes lint, build, and tests to ensure the codebase is always healthy.
+
+### Release Workflow
+
+Triggered manually from **GitHub → Actions → Release → Run workflow**.
+
+Steps it performs automatically:
+1. Lint + test (as a safety gate)
+2. Bump `package.json` version (`patch`, `minor`, or `major`)
+3. Build (`dist/`)
+4. Publish to GitHub Packages
+5. Commit the version bump, create a git tag, and push to `main`
+6. Create a GitHub Release with auto-generated release notes
+
+The only input required is the version type:
+
+```
+patch  →  0.0.1 → 0.0.2   (bug fixes)
+minor  →  0.0.1 → 0.1.0   (new features, backwards compatible)
+major  →  0.0.1 → 1.0.0   (breaking changes)
+```
+
+No manual `pnpm version` or `pnpm publish` needed — the workflow handles everything.
+
+### First-time Setup (local publishing only)
+
+> The release workflow uses the built-in `GITHUB_TOKEN` automatically — no secrets configuration needed in GitHub. This section is only needed to publish from your local machine.
 
 **1. Create a GitHub Personal Access Token**
 
