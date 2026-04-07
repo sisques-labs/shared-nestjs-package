@@ -5,8 +5,7 @@ import { BaseException } from '@/shared/domain/exceptions/base.exception';
  * This exception is thrown when a hexadecimal value is invalid.
  */
 export class InvalidHexException extends BaseException {
-
-	constructor(message: string) {
-		super(message);
-	}
+  constructor(message: string) {
+    super(message);
+  }
 }

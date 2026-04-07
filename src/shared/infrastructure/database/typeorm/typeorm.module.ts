@@ -8,8 +8,8 @@ const SUBSCRIBERS = [];
 
 @Global()
 @Module({
-	imports: [NestTypeOrmModule.forRoot(dataSourceOptions)],
-	providers: [...SERVICES, ...SUBSCRIBERS],
-	exports: [...SERVICES],
+  imports: [NestTypeOrmModule.forRoot(dataSourceOptions)],
+  providers: [...SERVICES, ...SUBSCRIBERS],
+  exports: [...SERVICES],
 })
 export class TypeOrmModule {}

@@ -15,30 +15,30 @@ import { UserStatusEnum } from '@/shared/domain/enums/user-context/user/user-sta
  * TODO: Move UserRoleEnum and UserStatusEnum to user module
  */
 const registeredEnums = [
-	// Shared enums
-	{
-		enum: FilterOperator,
-		name: 'FilterOperator',
-		description: 'The operator to filter by',
-	},
-	{
-		enum: SortDirection,
-		name: 'SortDirection',
-		description: 'The direction to sort by',
-	},
-	// User module enums (TODO: Move to user module)
-	{
-		enum: UserRoleEnum,
-		name: 'UserRoleEnum',
-		description: 'The role of the user',
-	},
-	{
-		enum: UserStatusEnum,
-		name: 'UserStatusEnum',
-		description: 'The status of the user',
-	},
+  // Shared enums
+  {
+    enum: FilterOperator,
+    name: 'FilterOperator',
+    description: 'The operator to filter by',
+  },
+  {
+    enum: SortDirection,
+    name: 'SortDirection',
+    description: 'The direction to sort by',
+  },
+  // User module enums (TODO: Move to user module)
+  {
+    enum: UserRoleEnum,
+    name: 'UserRoleEnum',
+    description: 'The role of the user',
+  },
+  {
+    enum: UserStatusEnum,
+    name: 'UserStatusEnum',
+    description: 'The status of the user',
+  },
 ];
 
 for (const { enum: enumType, name, description } of registeredEnums) {
-	registerEnumType(enumType, { name, description });
+  registerEnumType(enumType, { name, description });
 }

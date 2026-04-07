@@ -6,7 +6,7 @@ const SERVICES = [MongoMasterService];
 
 @Global()
 @Module({
-	providers: [...SERVICES],
-	exports: [...SERVICES],
+  providers: [...SERVICES],
+  exports: [...SERVICES],
 })
 export class MongoModule {}

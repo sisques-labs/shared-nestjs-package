@@ -5,8 +5,7 @@ import { BaseException } from '@/shared/domain/exceptions/base.exception';
  * This exception is thrown when an email value is invalid.
  */
 export class InvalidEmailException extends BaseException {
-
-	constructor(message: string) {
-		super(message);
-	}
+  constructor(message: string) {
+    super(message);
+  }
 }
