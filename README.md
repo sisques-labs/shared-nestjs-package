@@ -4,6 +4,9 @@ Shared NestJS library providing Domain-Driven Design (DDD) and CQRS building blo
 
 ## Table of Contents
 
+- [Publishing](#publishing)
+  - [Setup](#setup)
+  - [Releasing a new version](#releasing-a-new-version)
 - [Installation](#installation)
 - [Peer Dependencies](#peer-dependencies)
 - [Module Setup](#module-setup)
@@ -32,7 +35,77 @@ Shared NestJS library providing Domain-Driven Design (DDD) and CQRS building blo
 
 ---
 
+## Publishing
+
+This package is published to **GitHub Packages** under the `@sisques-labs` scope.
+
+### Setup
+
+**1. Create a GitHub Personal Access Token**
+
+Go to: GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token
+
+Required scopes:
+- `write:packages` — to publish
+- `read:packages` — to install in other projects
+
+**2. Authenticate with the GitHub registry**
+
+```bash
+npm login --registry=https://npm.pkg.github.com
+# Username: your GitHub username
+# Password: the token from step 1
+# Email: your GitHub email
+```
+
+Alternatively, add the token directly to `~/.npmrc`:
+
+```
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
+```
+
+**3. Publish**
+
+```bash
+pnpm publish
+```
+
+The `prepublishOnly` script runs `pnpm build` automatically before publishing, so `dist/` is always up to date.
+
+---
+
+### Releasing a new version
+
+Follow [Semantic Versioning](https://semver.org):
+
+```bash
+pnpm version patch   # bug fixes:        0.0.1 → 0.0.2
+pnpm version minor   # new features:     0.0.1 → 0.1.0
+pnpm version major   # breaking changes: 0.0.1 → 1.0.0
+```
+
+This updates `package.json` and creates a git tag automatically. Then publish:
+
+```bash
+pnpm publish
+```
+
+---
+
 ## Installation
+
+This package is hosted on GitHub Packages. Before installing, configure your project to resolve the `@sisques-labs` scope from the GitHub registry.
+
+**1. Add a `.npmrc` file to the root of your project:**
+
+```
+@sisques-labs:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+Set the `GITHUB_TOKEN` environment variable to a GitHub Personal Access Token with at least `read:packages` scope (see [Publishing → Setup](#setup)).
+
+**2. Install the package:**
 
 ```bash
 npm install @sisques-labs/shared-nestjs
