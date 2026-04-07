@@ -82,20 +82,15 @@ Required scopes:
 - `write:packages` — to publish
 - `read:packages` — to install in other projects
 
-**2. Authenticate with the GitHub registry**
+**2. Export the token as an environment variable**
+
+The `.npmrc` in this repo reads the token from `NODE_AUTH_TOKEN`:
 
 ```bash
-npm login --registry=https://npm.pkg.github.com
-# Username: your GitHub username
-# Password: the token from step 1
-# Email: your GitHub email
+export NODE_AUTH_TOKEN=YOUR_GITHUB_TOKEN
 ```
 
-Alternatively, add the token directly to `~/.npmrc`:
-
-```
-//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
-```
+Add this to your shell profile (`~/.zshrc` or `~/.bashrc`) to make it permanent.
 
 **3. Publish**
 
