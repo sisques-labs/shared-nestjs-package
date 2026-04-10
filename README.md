@@ -24,6 +24,7 @@ Shared NestJS library providing Domain-Driven Design (DDD) and CQRS building blo
   - [Command Handlers](#command-handlers)
   - [Service Interface](#service-interface)
 - [Infrastructure Layer](#infrastructure-layer)
+  - [Logging (Winston)](#logging-winston)
   - [MongoDB](#mongodb)
   - [TypeORM](#typeorm)
 - [Transport Layer (GraphQL)](#transport-layer-graphql)
@@ -459,6 +460,14 @@ export class UserService implements IBaseService {}
 ---
 
 ## Infrastructure Layer
+
+### Logging (Winston)
+
+Optional **structured logging** via Winston, daily log rotation, and `nest-winston`. Install peers `nest-winston`, `winston`, and `winston-daily-rotate-file` in the consuming app, then use `SharedWinstonModule` and helpers such as `createSharedWinstonLoggerOptions`.
+
+**Full guide (setup, async config, extension patterns):** [src/shared/infrastructure/logging/README.md](src/shared/infrastructure/logging/README.md)
+
+---
 
 ### MongoDB
 
