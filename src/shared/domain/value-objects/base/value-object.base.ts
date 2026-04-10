@@ -5,14 +5,18 @@
  * by their value rather than identity.
  * All concrete Value Objects must extend this class and implement {@link validate}.
  *
- * @template T The primitive or composite type the ValueObject wraps.
+ * @typeParam T The **aggregate** this value object represents: a primitive, a single
+ * domain concept, or a **composite** plain shape (e.g. `{ content: string; variables: Record<string, string> }`).
+ * For multi-attribute VOs, store each part in `private readonly` fields and let {@link value}
+ * return a single object of type `T` (or override {@link cloneForPrimitives} / {@link valuesAreEqual} when needed).
+ *
  * @public
  */
 export abstract class ValueObject<T> {
   /**
-   * Gets the raw wrapped value.
+   * Full domain value: one primitive, one tuple-like structure, or one object that groups every attribute.
    *
-   * @returns {T} The encapsulated value.
+   * @returns {T} The encapsulated value (scalar or composite).
    * @public
    * @readonly
    */
@@ -31,9 +35,23 @@ export abstract class ValueObject<T> {
   protected abstract validate(): void;
 
   /**
+   * Compares two aggregate values for equality. Default: `JSON.stringify` of both sides.
+   * Override for composite `T` when key order, nested types, or semantics differ from JSON equality.
+   *
+   * @param a - First aggregate (typically `this.value`).
+   * @param b - Second aggregate (typically `other.value`).
+   * @returns {boolean} Whether the two aggregates should be considered equal.
+   * @protected
+   */
+  protected valuesAreEqual(a: T, b: T): boolean {
+    return JSON.stringify(a) === JSON.stringify(b);
+  }
+
+  /**
    * Structural equality based on the wrapped value.
    *
-   * Subclasses may override to compare semantically (for instance, case-insensitive strings or fuzzy matches).
+   * Subclasses may override {@link valuesAreEqual} instead of this method when only the comparison logic differs,
+   * or override this method entirely (e.g. to narrow the parameter type to a concrete VO class).
    *
    * @param other The other ValueObject to compare with.
    * @returns {boolean} `true` if both value objects are equal by wrapped value, otherwise `false`.
@@ -41,23 +59,35 @@ export abstract class ValueObject<T> {
    */
   public equals(other: ValueObject<T>): boolean {
     if (!(other instanceof ValueObject)) return false;
-    return JSON.stringify(this.value) === JSON.stringify(other.value);
+    return this.valuesAreEqual(this.value, other.value);
+  }
+
+  /**
+   * Maps `value` to a plain, serializable copy. Default uses a JSON round-trip for objects.
+   * Override when `T` contains fields that `JSON.stringify` mishandles or when nested value objects
+   * must be flattened via their own `toPrimitives()`.
+   *
+   * @param value - The aggregate returned by {@link value}.
+   * @returns {T} Plain representation safe for persistence or transport.
+   * @protected
+   */
+  protected cloneForPrimitives(value: T): T {
+    if (value === null || value === undefined) return value;
+    if (typeof value === 'object') return JSON.parse(JSON.stringify(value)) as T;
+    return value;
   }
 
   /**
    * Creates a deeply serializable/plain copy of the wrapped value.
    *
-   * For primitives, this returns the value unchanged.
-   * For objects, returns a deep clone suitable for transport or persistence.
+   * For primitives, this returns the value unchanged (via {@link cloneForPrimitives}).
+   * For objects, default is a deep clone suitable for transport or persistence.
    *
    * @returns {T} The plain representation.
    * @public
    */
   public toPrimitives(): T {
-    const v = this.value;
-    if (v === null || v === undefined) return v;
-    if (typeof v === 'object') return JSON.parse(JSON.stringify(v)) as T;
-    return v;
+    return this.cloneForPrimitives(this.value);
   }
 
   /**

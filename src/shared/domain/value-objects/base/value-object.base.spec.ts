@@ -34,6 +34,59 @@ class TestObjectVO extends ValueObject<{ x: number; y: number }> {
   protected validate(): void {}
 }
 
+/** Composite VO: multiple private attributes aggregated into `value` (e.g. prompt body + variables). */
+class TestCompositeVO extends ValueObject<{
+  content: string;
+  variables: Record<string, string>;
+}> {
+  private readonly _content: string;
+  private readonly _variables: Readonly<Record<string, string>>;
+
+  constructor(content: string, variables: Record<string, string>) {
+    super();
+    this._content = content;
+    this._variables = { ...variables };
+    this.validate();
+  }
+
+  get value() {
+    return {
+      content: this._content,
+      variables: { ...this._variables },
+    };
+  }
+
+  protected validate(): void {
+    if (!this._content.trim()) throw new Error('content cannot be empty');
+  }
+}
+
+class TestCustomEqualityVO extends ValueObject<{ tags: string[] }> {
+  private readonly _tags: readonly string[];
+
+  constructor(tags: string[]) {
+    super();
+    this._tags = [...tags];
+    this.validate();
+  }
+
+  get value() {
+    return { tags: [...this._tags] };
+  }
+
+  protected validate(): void {}
+
+  protected valuesAreEqual(
+    a: { tags: string[] },
+    b: { tags: string[] },
+  ): boolean {
+    if (a.tags.length !== b.tags.length) return false;
+    const sortedA = [...a.tags].sort();
+    const sortedB = [...b.tags].sort();
+    return sortedA.every((t, i) => t === sortedB[i]);
+  }
+}
+
 describe('ValueObject', () => {
   describe('equals', () => {
     it('returns true for same primitive value', () => {
@@ -51,6 +104,24 @@ describe('ValueObject', () => {
     it('returns false for different object value', () => {
       expect(new TestObjectVO(1, 2).equals(new TestObjectVO(1, 3))).toBe(false);
     });
+
+    it('returns true for composite value objects with same attributes', () => {
+      const a = new TestCompositeVO('Hello', { name: 'Ada' });
+      const b = new TestCompositeVO('Hello', { name: 'Ada' });
+      expect(a.equals(b)).toBe(true);
+    });
+
+    it('returns false when composite attributes differ', () => {
+      const a = new TestCompositeVO('Hello', { name: 'Ada' });
+      const b = new TestCompositeVO('Hello', { name: 'Bob' });
+      expect(a.equals(b)).toBe(false);
+    });
+
+    it('uses valuesAreEqual when overridden (order-insensitive tags)', () => {
+      const a = new TestCustomEqualityVO(['b', 'a']);
+      const b = new TestCustomEqualityVO(['a', 'b']);
+      expect(a.equals(b)).toBe(true);
+    });
   });
 
   describe('toPrimitives', () => {
@@ -63,6 +134,13 @@ describe('ValueObject', () => {
       const primitives = vo.toPrimitives();
       expect(primitives).toEqual({ x: 1, y: 2 });
       expect(primitives).not.toBe(vo.value);
+    });
+
+    it('deep-copies nested object attributes on composite VOs', () => {
+      const vo = new TestCompositeVO('Hi', { k: 'v' });
+      const p = vo.toPrimitives();
+      expect(p).toEqual({ content: 'Hi', variables: { k: 'v' } });
+      expect(p.variables).not.toBe(vo.value.variables);
     });
   });
 
@@ -91,6 +169,10 @@ describe('ValueObject', () => {
   describe('validate enforcement', () => {
     it('throws when validation fails', () => {
       expect(() => new TestStringVO('')).toThrow('Value cannot be empty');
+    });
+
+    it('validates composite VOs using aggregate rules', () => {
+      expect(() => new TestCompositeVO('   ', {})).toThrow('content cannot be empty');
     });
   });
 });

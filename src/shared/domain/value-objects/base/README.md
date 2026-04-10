@@ -25,11 +25,45 @@ import { ValueObject } from '@sisques-labs/shared-nestjs';
 
 ---
 
+## Scalar vs composite `T`
+
+- **Scalar / single concept:** `T` is `string`, `number`, `boolean`, `Date`, etc. One private field is enough.
+- **Composite:** `T` is an object type that groups every attribute, e.g. `{ content: string; variables: Record<string, string> }`. Use **several** `private readonly` fields (`_content`, `_variables`, …) and make `get value()` return a **plain object** of type `T` (copying into new objects/arrays so the VO stays immutable). Example:
+
+```typescript
+export class PromptBody extends ValueObject<{
+  content: string;
+  variables: Record<string, string>;
+}> {
+  private readonly _content: string;
+  private readonly _variables: Readonly<Record<string, string>>;
+
+  constructor(content: string, variables: Record<string, string>) {
+    super();
+    this._content = content;
+    this._variables = { ...variables };
+    this.validate();
+  }
+
+  get value() {
+    return { content: this._content, variables: { ...this._variables } };
+  }
+
+  protected validate(): void {
+    /* domain rules */
+  }
+}
+```
+
+If some parts are themselves value objects in your domain, either flatten them inside `value` as primitives or override `cloneForPrimitives` to call `toPrimitives()` on nested VOs.
+
+---
+
 ## What you must implement
 
 ### `get value(): T`
 
-Returns the encapsulated value. Often backed by a private `readonly` field.
+Returns the full aggregate (primitive or composite). For composites, build it from your private fields.
 
 ### `protected validate(): void`
 
@@ -46,27 +80,27 @@ Enforce domain rules. On failure, throw a **domain exception** from this package
 Default implementation:
 
 1. Returns `false` if `other` is not a `ValueObject` instance.
-2. Otherwise compares `JSON.stringify(this.value)` with `JSON.stringify(other.value)`.
+2. Otherwise uses **`protected valuesAreEqual(a, b)`**, which defaults to comparing `JSON.stringify(a)` and `JSON.stringify(b)`.
 
-**Override** when:
+**Prefer overriding `valuesAreEqual`** when only the comparison of two `T` values should change (e.g. order-insensitive arrays, normalized strings) while keeping the `instanceof` guard.
 
-- You need semantic equality that JSON serialization does not capture (e.g. normalized strings, dates compared by instant).
-- Object key order must not affect equality (default stringify order follows insertion order; two “equal” objects with different key order compare unequal).
-- You wrap primitives and want stricter typing (many subclasses override `equals` to accept their concrete type only).
+**Override `equals` entirely** when you need a narrower parameter type (e.g. `equals(other: MyVo): boolean`).
 
-**Caveat:** `JSON.stringify` skips some values (e.g. `undefined` in objects) and does not handle `BigInt`, `Symbol`, or circular structures. For complex aggregates, prefer a dedicated equality implementation.
+**Caveat:** `JSON.stringify` skips some values (e.g. `undefined` in objects) and does not handle `BigInt`, `Symbol`, or circular structures.
 
 ---
 
 ### `toPrimitives(): T`
 
-Returns a value suitable for persistence or API layers:
+Calls **`protected cloneForPrimitives(this.value)`**. The default:
 
 - **`null` / `undefined`:** returned as-is.
-- **Objects:** deep-cloned via `JSON.parse(JSON.stringify(value))` (a new object reference).
+- **Objects:** deep-cloned via `JSON.parse(JSON.stringify(value))`.
 - **Primitives:** returned as-is.
 
-**Caveat:** the JSON round-trip **drops** non-JSON types (`Date` becomes an ISO string only if already serialized correctly, `Map`/`Set` become `{}` or `[]` depending on structure, functions are omitted). Override `toPrimitives()` when you need explicit mapping.
+**Override `cloneForPrimitives`** when `T` is composite and contains types JSON mishandles or nested value objects that expose their own `toPrimitives()`. You can still override `toPrimitives()` directly if you prefer (as some package VOs do).
+
+**Caveat:** the JSON round-trip **drops** non-JSON types (`Date`, `Map`/`Set`, etc.).
 
 ---
 
