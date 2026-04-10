@@ -2,9 +2,6 @@ import { Global, Module } from '@nestjs/common';
 
 import { MutationResponseGraphQLMapper } from '@/shared/transport/graphql/mappers/mutation-response/mutation-response.mapper';
 
-import { MongoModule } from './infrastructure/database/mongodb/mongodb.module';
-import { TypeOrmModule } from './infrastructure/database/typeorm/typeorm.module';
-
 // Import enums for GraphQL
 import '@/shared/transport/graphql/enums/shared-registered-enums.graphql';
 
@@ -26,7 +23,7 @@ const REPOSITORIES = [];
 
 @Global()
 @Module({
-  imports: [MongoModule, TypeOrmModule],
+  imports: [],
   controllers: [],
   providers: [
     ...RESOLVERS,
@@ -39,8 +36,6 @@ const REPOSITORIES = [];
     ...REPOSITORIES,
   ],
   exports: [
-    MongoModule,
-    TypeOrmModule,
     ...RESOLVERS,
     ...SERVICES,
     ...QUERY_HANDLERS,

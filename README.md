@@ -139,7 +139,7 @@ For contributors working on this repository:
 
 ## Module Setup
 
-Import **`SharedModule`** in your root or core module. It is **`@Global()`**, so exported providers (for example `MongoMasterService`, `TypeormMasterService`, `MutationResponseGraphQLMapper`) are visible across the app without re-importing the module.
+Import **`SharedModule`** in your root or core module. It is **`@Global()`** and only registers cross-cutting pieces that do not require a database (for example **`MutationResponseGraphQLMapper`** and shared GraphQL enum registration). It does **not** import MongoDB or TypeORM—you add those only if you need them.
 
 ```typescript
 import { Module } from '@nestjs/common';
@@ -151,7 +151,30 @@ import { SharedModule } from '@sisques-labs/shared-nestjs';
 export class AppModule {}
 ```
 
-`SharedModule` wires **`MongoModule`** and **`TypeOrmModule`**. Configure database connections in **your** application (`MONGO_URI`, `MONGO_DB_NAME`, TypeORM `DataSource`, etc.); this library only provides helpers and services that read that configuration.
+**Optional database modules** (import alongside `SharedModule` when you use them):
+
+- **`MongoModule`** — provides `MongoMasterService` (`MONGODB_URI`, `MONGODB_DATABASE` via `ConfigService`).
+- **`TypeOrmModule`** — registers `TypeOrmModule.forRootAsync` using `DATABASE_*` config; requires **`ConfigModule`** in the app (for example `ConfigModule.forRoot({ isGlobal: true })`).
+
+```typescript
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import {
+  SharedModule,
+  MongoModule,
+  TypeOrmModule,
+} from '@sisques-labs/shared-nestjs';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    SharedModule,
+    MongoModule, // omit if you do not use MongoDB
+    TypeOrmModule, // omit if you do not use TypeORM
+  ],
+})
+export class AppModule {}
+```
 
 **Logging is separate:** this library does **not** register `WinstonModule`. Import **`WinstonModule`** from `nest-winston` in your app and pass **`createSharedWinstonLoggerOptions()`** or **`defaultSharedWinstonLoggerOptions`**—see [Logging (Winston)](#logging-winston).
 
@@ -447,11 +470,15 @@ Optional **Winston `LoggerOptions`** (JSON file rotation + console formats) for 
 
 ### MongoDB
 
+Import **`MongoModule`** from this package when you use MongoDB repositories. It is **not** part of **`SharedModule`**.
+
 #### Environment Variables
 
+The shared `MongoMasterService` reads:
+
 ```env
-MONGO_URI=mongodb://localhost:27017
-MONGO_DB_NAME=my_database
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DATABASE=my_database
 ```
 
 #### Base Repository
@@ -509,15 +536,22 @@ type UserMongoDto = BaseMongoDto & {
 
 ### TypeORM
 
+Import **`TypeOrmModule`** when you use TypeORM. It is **not** part of **`SharedModule`**. Use **`ConfigModule.forRoot`** (global or imported) so `ConfigService` is available; options are built at runtime via **`buildTypeOrmModuleOptions`** inside `forRootAsync`—no database env is read when you merely `import` the package.
+
 #### Environment Variables
 
 ```env
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=secret
-DB_DATABASE=my_database
+DATABASE_DRIVER=postgres
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=secret
+DATABASE_DATABASE=my_database
+DATABASE_SYNCHRONIZE=false
+DATABASE_MIGRATIONS_TABLE_NAME=migrations
 ```
+
+Optional: `NODE_ENV` (affects query logging). For TypeORM CLI migrations that use `data-source.ts`, the same variables must be set in the environment when the CLI runs.
 
 #### Base Entity
 

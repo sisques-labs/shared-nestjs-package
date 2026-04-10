@@ -1,34 +1,43 @@
-import { ConfigService } from '@nestjs/config';
 import 'dotenv/config';
 import { DataSource, DataSourceOptions } from 'typeorm';
-
-const configService = new ConfigService();
+import { join } from 'path';
 
 /**
- * TypeORM DataSource used by the CLI for migrations (generate, run, revert, show).
- * The NestJS app uses TypeOrmModule.forRootAsync() in typeorm.module.ts instead.
- *
- * @see https://typeorm.io/migrations#using-cli
+ * Reads a required env var for TypeORM CLI usage (migrations). Not used by Nest at startup.
+ */
+function requiredEnv(name: string): string {
+  const value = process.env[name];
+  if (value === undefined || value === '') {
+    throw new Error(
+      `Missing environment variable "${name}" for TypeORM CLI data source`,
+    );
+  }
+  return value;
+}
+
+const rootFromThisFile = join(__dirname, '/../../../../');
+
+/**
+ * TypeORM DataSource options for the CLI (`typeorm -d ...`).
+ * Keep env vars aligned with {@link buildTypeOrmModuleOptions}.
  */
 export const dataSourceOptions: DataSourceOptions = {
-  // @ts-expect-error // TypeORM expects predefined strings for type
-  type: configService.getOrThrow<string>('DATABASE_DRIVER'),
-  host: configService.getOrThrow<string>('DATABASE_HOST'),
-  port: configService.getOrThrow<number>('DATABASE_PORT'),
-  username: configService.getOrThrow<string>('DATABASE_USERNAME'),
-  password: configService.getOrThrow<string>('DATABASE_PASSWORD'),
-  database: configService.getOrThrow<string>('DATABASE_DATABASE'),
-  entities: [__dirname + '/../../../../**/*-typeorm.entity{.ts,.js}'],
-  migrations: [__dirname + '/../../../../migrations/*{.ts,.js}'],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- driver from env
+  type: requiredEnv('DATABASE_DRIVER') as any,
+  host: requiredEnv('DATABASE_HOST'),
+  port: Number(requiredEnv('DATABASE_PORT')),
+  username: requiredEnv('DATABASE_USERNAME'),
+  password: requiredEnv('DATABASE_PASSWORD'),
+  database: requiredEnv('DATABASE_DATABASE'),
+  entities: [join(rootFromThisFile, '**/*-typeorm.entity{.ts,.js}')],
+  migrations: [join(rootFromThisFile, 'migrations/*{.ts,.js}')],
   migrationsTableName:
-    configService.getOrThrow<string>('DATABASE_MIGRATIONS_TABLE_NAME') ||
-    'migrations',
+    process.env.DATABASE_MIGRATIONS_TABLE_NAME ?? 'migrations',
   migrationsRun: false,
-  synchronize:
-    configService.getOrThrow<string>('DATABASE_SYNCHRONIZE') === 'true',
-  logging: configService.getOrThrow<string>('NODE_ENV') !== 'production',
+  synchronize: process.env.DATABASE_SYNCHRONIZE === 'true',
+  logging: process.env.NODE_ENV !== 'production',
   extra: {
-    connectionLimit: 10, // Adjust based on your database connection pool requirements
+    connectionLimit: 10,
   },
 };
 

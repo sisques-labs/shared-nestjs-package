@@ -111,6 +111,7 @@ export * from './shared/infrastructure/database/typeorm/base-typeorm/base-typeor
 export * from './shared/infrastructure/database/typeorm/dtos/base-typeorm.dto';
 export * from './shared/infrastructure/database/typeorm/entities/base-typeorm.entity';
 export * from './shared/infrastructure/database/typeorm/services/typeorm-master/typeorm-master.service';
+export * from './shared/infrastructure/database/typeorm/typeorm-module-options.factory';
 export * from './shared/infrastructure/database/typeorm/typeorm.module';
 
 // ─── Transport ────────────────────────────────────────────────────────────────

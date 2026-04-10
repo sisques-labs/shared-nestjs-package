@@ -4,6 +4,10 @@ import { MongoMasterService } from '@/shared/infrastructure/database/mongodb/ser
 
 const SERVICES = [MongoMasterService];
 
+/**
+ * Opt-in MongoDB integration. Import only in apps that use MongoDB.
+ * Expects `MONGODB_URI` and `MONGODB_DATABASE` via `ConfigService` (provide `ConfigModule.forRoot` in the app).
+ */
 @Global()
 @Module({
   providers: [...SERVICES],
