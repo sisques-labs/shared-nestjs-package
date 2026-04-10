@@ -11,6 +11,15 @@ on:
           - patch
           - minor
           - major
+      release_type:
+        description: Release type
+        required: true
+        type: choice
+        default: stable
+        options:
+          - stable
+          - alpha
+          - beta
 
 jobs:
   release:
@@ -56,14 +65,23 @@ jobs:
       - name: Bump version
         id: bump
         run: |
-          NEW_VERSION=$(npm version ${{ inputs.version }} --no-git-tag-version)
+          if [ "${{ inputs.release_type }}" = "stable" ]; then
+            NEW_VERSION=$(npm version ${{ inputs.version }} --no-git-tag-version)
+          else
+            NEW_VERSION=$(npm version pre${{ inputs.version }} --preid=${{ inputs.release_type }} --no-git-tag-version)
+          fi
           echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
 
       - name: Build
         run: pnpm build
 
       - name: Publish to npm
-        run: pnpm publish --no-git-checks
+        run: |
+          if [ "${{ inputs.release_type }}" = "stable" ]; then
+            pnpm publish --no-git-checks
+          else
+            pnpm publish --no-git-checks --tag ${{ inputs.release_type }}
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -80,3 +98,4 @@ jobs:
           tag_name: ${{ steps.bump.outputs.version }}
           name: ${{ steps.bump.outputs.version }}
           generate_release_notes: true
+          prerelease: ${{ inputs.release_type != 'stable' }}
