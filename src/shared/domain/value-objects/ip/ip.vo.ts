@@ -1,4 +1,5 @@
 import { InvalidIpException } from '@/shared/domain/exceptions/value-objects/invalid-ip/invalid-ip.exception';
+import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
 
 /**
  * IP Value Object
@@ -7,12 +8,13 @@ import { InvalidIpException } from '@/shared/domain/exceptions/value-objects/inv
  * @param value - The IP address.
  * @returns A new instance of the IpValueObject.
  */
-export class IpValueObject {
+export class IpValueObject extends ValueObject<string> {
   private readonly _value: string;
 
   constructor(value: string) {
-    this.validate(value);
-    this._value = value.trim();
+    super();
+    this._value = (value ?? '').trim();
+    this.validate();
   }
 
   public get value(): string {
@@ -75,21 +77,19 @@ export class IpValueObject {
     return this.isIPv4() ? 4 : 6;
   }
 
-  private validate(value: string): void {
-    this.checkIsEmpty(value);
-    this.checkIsValidIp(value);
+  protected validate(): void {
+    this.checkIsEmpty();
+    this.checkIsValidIp();
   }
 
-  private checkIsEmpty(value: string): void {
-    if (!value || value.trim() === '') {
+  private checkIsEmpty(): void {
+    if (!this._value || this._value.trim() === '') {
       throw new InvalidIpException('IP address cannot be empty');
     }
   }
 
-  private checkIsValidIp(value: string): void {
-    const trimmedValue = value.trim();
-
-    if (this.isValidIPv4(trimmedValue) || this.isValidIPv6(trimmedValue)) {
+  private checkIsValidIp(): void {
+    if (this.isValidIPv4(this._value) || this.isValidIPv6(this._value)) {
       return;
     }
 

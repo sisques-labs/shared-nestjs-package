@@ -1,4 +1,5 @@
 import { InvalidEnumValueException } from '@/shared/domain/exceptions/value-objects/invalid-enum-value/invalid-enum-value.exception';
+import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
 
 /**
  * Enum Value Object
@@ -8,12 +9,13 @@ import { InvalidEnumValueException } from '@/shared/domain/exceptions/value-obje
  */
 export abstract class EnumValueObject<
   T extends Record<string, string | number>,
-> {
+> extends ValueObject<string> {
   private readonly _value: string;
 
   constructor(value: string) {
-    this.validate(value);
+    super();
     this._value = value;
+    this.validate();
   }
 
   public get value(): string {
@@ -269,17 +271,17 @@ export abstract class EnumValueObject<
 
   protected abstract get enumObject(): T;
 
-  protected validate(value: string): void {
-    if (!value || value.trim() === '') {
+  protected validate(): void {
+    if (!this._value || this._value.trim() === '') {
       throw new InvalidEnumValueException(
         `Enum value cannot be empty for ${this.constructor.name}`,
       );
     }
 
     const enumValues = Object.values(this.enumObject);
-    if (!enumValues.includes(value)) {
+    if (!enumValues.includes(this._value)) {
       throw new InvalidEnumValueException(
-        `Invalid value for ${this.constructor.name}: ${value}. Valid values are: ${enumValues.join(', ')}`,
+        `Invalid value for ${this.constructor.name}: ${this._value}. Valid values are: ${enumValues.join(', ')}`,
       );
     }
   }

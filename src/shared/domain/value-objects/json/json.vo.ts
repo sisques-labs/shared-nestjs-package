@@ -1,4 +1,5 @@
 import { InvalidJsonException } from '@/shared/domain/exceptions/value-objects/invalid-json/invalid-json.exception';
+import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
 
 /**
  * JSON Value Object
@@ -8,7 +9,7 @@ import { InvalidJsonException } from '@/shared/domain/exceptions/value-objects/i
  * @param options - Validation options for the JSON.
  * @returns A new instance of the JsonValueObject.
  */
-export class JsonValueObject {
+export class JsonValueObject extends ValueObject<Record<string, any>> {
   private readonly _value: Record<string, any>;
 
   constructor(
@@ -21,6 +22,7 @@ export class JsonValueObject {
       schema?: Record<string, any>;
     } = {},
   ) {
+    super();
     this._value = this.processValue(value);
     this.validate();
   }
@@ -286,7 +288,7 @@ export class JsonValueObject {
     return value;
   }
 
-  private validate(): void {
+  protected validate(): void {
     this.checkEmpty();
     this.checkDepth();
     this.checkRequiredKeys();

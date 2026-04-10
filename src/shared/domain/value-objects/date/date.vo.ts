@@ -1,13 +1,20 @@
+import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
+
 /**
  * A value object representing a date.
  * This class encapsulates a Date instance and provides methods for comparison and formatting.
  */
-export class DateValueObject {
+export class DateValueObject extends ValueObject<Date> {
   private readonly _value: Date;
 
   constructor(date?: Date) {
+    super();
     this._value = date ?? new Date();
+    this.validate();
   }
+
+  protected validate(): void {}
+
 
   public get value(): Date {
     return this._value;

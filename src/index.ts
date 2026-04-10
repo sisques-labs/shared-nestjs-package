@@ -64,6 +64,7 @@ export * from './shared/domain/interfaces/updated-field.interface';
 export * from './shared/domain/primitives/base-primitives/base.primitives';
 
 // Value Objects
+export * from './shared/domain/value-objects/base/value-object.base';
 export * from './shared/domain/value-objects/boolean/boolean.vo';
 export * from './shared/domain/value-objects/color/color.vo';
 export * from './shared/domain/value-objects/date/date.vo';

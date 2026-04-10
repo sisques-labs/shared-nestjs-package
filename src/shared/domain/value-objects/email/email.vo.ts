@@ -1,4 +1,5 @@
 import { InvalidEmailException } from '@/shared/domain/exceptions/value-objects/invalid-email/invalid-email.exception';
+import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
 
 /**
  * Email Value Object
@@ -7,12 +8,13 @@ import { InvalidEmailException } from '@/shared/domain/exceptions/value-objects/
  * @param value - The email address.
  * @returns A new instance of the EmailValueObject.
  */
-export class EmailValueObject {
+export class EmailValueObject extends ValueObject<string> {
   private readonly _value: string;
 
   constructor(value: string) {
-    this.validate(value);
-    this._value = value.toLowerCase().trim();
+    super();
+    this._value = (value ?? '').toLowerCase().trim();
+    this.validate();
   }
 
   public get value(): string {
@@ -39,32 +41,32 @@ export class EmailValueObject {
     return this._value.split('@')[1];
   }
 
-  private validate(value: string): void {
-    this.checkIsEmpty(value);
-    this.checkIsValidEmail(value);
+  protected validate(): void {
+    this.checkIsEmpty();
+    this.checkIsValidEmail();
   }
 
-  private checkIsEmpty(value: string): void {
-    if (!value || value.trim() === '') {
+  private checkIsEmpty(): void {
+    if (!this._value || this._value.trim() === '') {
       throw new InvalidEmailException('Email cannot be empty');
     }
   }
 
-  private checkIsValidEmail(value: string): void {
+  private checkIsValidEmail(): void {
     // RFC 5322 compliant email regex
     const emailPattern =
       /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
-    if (!emailPattern.test(value)) {
+    if (!emailPattern.test(this._value)) {
       throw new InvalidEmailException('Invalid email format');
     }
 
     // Additional checks
-    if (value.length > 254) {
+    if (this._value.length > 254) {
       throw new InvalidEmailException('Email is too long (max 254 characters)');
     }
 
-    const localPart = value.split('@')[0];
+    const localPart = this._value.split('@')[0];
     if (localPart.length > 64) {
       throw new InvalidEmailException(
         'Local part of email is too long (max 64 characters)',

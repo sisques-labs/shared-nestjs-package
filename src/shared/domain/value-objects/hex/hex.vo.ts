@@ -1,4 +1,5 @@
 import { InvalidHexException } from '@/shared/domain/exceptions/value-objects/invalid-hex/invalid-hex.exception';
+import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
 
 /**
  * Hex Value Object
@@ -7,20 +8,17 @@ import { InvalidHexException } from '@/shared/domain/exceptions/value-objects/in
  * @param value - The hexadecimal string.
  * @returns A new instance of the HexValueObject.
  */
-export class HexValueObject {
+export class HexValueObject extends ValueObject<string> {
   private readonly _value: string;
 
   constructor(value: string) {
-    this.validate(value);
-    this._value = value.toLowerCase();
+    super();
+    this._value = (value ?? '').toLowerCase();
+    this.validate();
   }
 
   public get value(): string {
     return this._value;
-  }
-
-  public equals(other: HexValueObject): boolean {
-    return this._value === other._value;
   }
 
   /**
@@ -39,20 +37,20 @@ export class HexValueObject {
     return Buffer.from(this._value, 'hex');
   }
 
-  private validate(value: string): void {
-    this.checkIsEmpty(value);
-    this.checkIsHex(value);
+  protected validate(): void {
+    this.checkIsEmpty();
+    this.checkIsHex();
   }
 
-  private checkIsEmpty(value: string): void {
-    if (!value || value.trim() === '') {
+  private checkIsEmpty(): void {
+    if (!this._value || this._value.trim() === '') {
       throw new InvalidHexException('Hex value cannot be empty');
     }
   }
 
-  private checkIsHex(value: string): void {
+  private checkIsHex(): void {
     const hexPattern = /^[0-9a-fA-F]+$/;
-    if (!hexPattern.test(value)) {
+    if (!hexPattern.test(this._value)) {
       throw new InvalidHexException('Value must be a valid hexadecimal string');
     }
   }

@@ -1,4 +1,5 @@
 import { InvalidBooleanException } from '@/shared/domain/exceptions/value-objects/invalid-boolean/invalid-boolean.exception';
+import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
 
 /**
  * Boolean Value Object
@@ -8,7 +9,7 @@ import { InvalidBooleanException } from '@/shared/domain/exceptions/value-object
  * @param options - Validation options for the boolean.
  * @returns A new instance of the BooleanValueObject.
  */
-export class BooleanValueObject {
+export class BooleanValueObject extends ValueObject<boolean> {
   private readonly _value: boolean;
 
   constructor(
@@ -19,6 +20,7 @@ export class BooleanValueObject {
       strictMode?: boolean;
     } = {},
   ) {
+    super();
     this._value = this.parseValue(value);
     this.validate();
   }
@@ -186,7 +188,7 @@ export class BooleanValueObject {
     throw new InvalidBooleanException(`Invalid boolean value: ${value}`);
   }
 
-  private validate(): void {
+  protected validate(): void {
     // Additional validation can be added here if needed
     // For now, the parsing logic handles most validation
   }

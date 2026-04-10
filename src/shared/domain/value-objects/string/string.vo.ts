@@ -1,4 +1,5 @@
 import { InvalidStringException } from '@/shared/domain/exceptions/value-objects/invalid-string/invalid-string.exception';
+import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
 
 /**
  * String Value Object
@@ -8,7 +9,7 @@ import { InvalidStringException } from '@/shared/domain/exceptions/value-objects
  * @param options - Validation options for the string.
  * @returns A new instance of the StringValueObject.
  */
-export class StringValueObject {
+export class StringValueObject extends ValueObject<string> {
   private readonly _value: string;
 
   constructor(
@@ -22,6 +23,7 @@ export class StringValueObject {
       caseSensitive?: boolean;
     } = {},
   ) {
+    super();
     this._value = this.processValue(value);
     this.validate();
   }
@@ -238,7 +240,7 @@ export class StringValueObject {
     return processedValue;
   }
 
-  private validate(): void {
+  protected validate(): void {
     this.checkEmpty();
     this.checkLength();
     this.checkPattern();

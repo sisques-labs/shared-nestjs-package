@@ -1,4 +1,5 @@
 import { InvalidDimensionsException } from '@/shared/domain/exceptions/value-objects/invalid-dimensions/invalid-dimensions.exception';
+import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
 import { LengthUnitValueObject } from '@/shared/domain/value-objects/length-unit/length-unit.vo';
 
 /**
@@ -19,7 +20,12 @@ import { LengthUnitValueObject } from '@/shared/domain/value-objects/length-unit
  * dimensions.getSurfaceArea(); // 190 (square centimeters)
  * ```
  */
-export class DimensionsValueObject {
+export class DimensionsValueObject extends ValueObject<{
+  length: number;
+  width: number;
+  height: number;
+  unit: string;
+}> {
   private readonly _length: number;
   private readonly _width: number;
   private readonly _height: number;
@@ -39,6 +45,7 @@ export class DimensionsValueObject {
       precision?: number;
     } = {},
   ) {
+    super();
     this.validateRequiredFields(dimensions);
     this._length = this.parseValue(dimensions.length, 'length');
     this._width = this.parseValue(dimensions.width, 'width');
@@ -319,7 +326,7 @@ export class DimensionsValueObject {
     return value;
   }
 
-  private validate(): void {
+  protected validate(): void {
     this.validateDimension(this._length, 'length');
     this.validateDimension(this._width, 'width');
     this.validateDimension(this._height, 'height');

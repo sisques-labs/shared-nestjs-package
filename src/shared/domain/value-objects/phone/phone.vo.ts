@@ -1,4 +1,5 @@
 import { InvalidPhoneException } from '@/shared/domain/exceptions/value-objects/invalid-phone/invalid-phone.exception';
+import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
 
 /**
  * Phone Value Object
@@ -7,20 +8,17 @@ import { InvalidPhoneException } from '@/shared/domain/exceptions/value-objects/
  * @param value - The phone number.
  * @returns A new instance of the PhoneValueObject.
  */
-export class PhoneValueObject {
+export class PhoneValueObject extends ValueObject<string> {
   private readonly _value: string;
 
   constructor(value: string) {
-    this.validate(value);
-    this._value = this.normalize(value);
+    super();
+    this._value = this.normalize(value ?? '');
+    this.validate();
   }
 
   public get value(): string {
     return this._value;
-  }
-
-  public equals(other: PhoneValueObject): boolean {
-    return this._value === other._value;
   }
 
   /**
@@ -52,37 +50,29 @@ export class PhoneValueObject {
     return this._value.startsWith('+') ? this._value : `+${this._value}`;
   }
 
-  private validate(value: string): void {
-    this.checkIsEmpty(value);
-    this.checkIsValidPhone(value);
+  protected validate(): void {
+    this.checkIsEmpty();
+    this.checkIsValidPhone();
   }
 
-  private checkIsEmpty(value: string): void {
-    if (!value || value.trim() === '') {
+  private checkIsEmpty(): void {
+    if (!this._value || this._value.trim() === '') {
       throw new InvalidPhoneException('Phone number cannot be empty');
     }
   }
 
-  private checkIsValidPhone(value: string): void {
-    // Remove all non-digit characters except +
-    const cleanValue = value.replace(/[^\d+]/g, '');
-
-    // Check if it's a valid international format
+  private checkIsValidPhone(): void {
+    // _value is already normalized: starts with +, only digits/+
     const internationalPattern = /^\+[1-9]\d{1,14}$/;
-    // Check if it's a valid national format (7-15 digits)
-    const nationalPattern = /^\d{7,15}$/;
 
-    if (
-      !internationalPattern.test(cleanValue) &&
-      !nationalPattern.test(cleanValue)
-    ) {
+    if (!internationalPattern.test(this._value)) {
       throw new InvalidPhoneException('Invalid phone number format');
     }
 
-    // Check length constraints
-    if (cleanValue.length < 7 || cleanValue.length > 16) {
+    // +1234567 = 8 chars min, +1234567890123456 = 17 chars max
+    if (this._value.length < 8 || this._value.length > 16) {
       throw new InvalidPhoneException(
-        'Phone number must be between 7 and 16 digits',
+        'Phone number must be between 7 and 15 digits',
       );
     }
   }

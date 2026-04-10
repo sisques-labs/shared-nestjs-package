@@ -1,4 +1,5 @@
 import { InvalidPasswordException } from '@/shared/domain/exceptions/value-objects/invalid-password/invalid-password.exception';
+import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
 
 /**
  * Password Value Object
@@ -7,12 +8,13 @@ import { InvalidPasswordException } from '@/shared/domain/exceptions/value-objec
  * @param value - The password string.
  * @returns A new instance of the PasswordValueObject.
  */
-export class PasswordValueObject {
+export class PasswordValueObject extends ValueObject<string> {
   private readonly _value: string;
 
   constructor(value: string) {
-    this.validate(value);
+    super();
     this._value = value;
+    this.validate();
   }
 
   public get value(): string {
@@ -73,27 +75,27 @@ export class PasswordValueObject {
     );
   }
 
-  private validate(value: string): void {
-    this.checkIsEmpty(value);
-    this.checkMinimumLength(value);
-    this.checkCommonPasswords(value);
+  protected validate(): void {
+    this.checkIsEmpty();
+    this.checkMinimumLength();
+    this.checkCommonPasswords();
   }
 
-  private checkIsEmpty(value: string): void {
-    if (!value || value.trim() === '') {
+  private checkIsEmpty(): void {
+    if (!this._value || this._value.trim() === '') {
       throw new InvalidPasswordException('Password cannot be empty');
     }
   }
 
-  private checkMinimumLength(value: string): void {
-    if (value.length < 8) {
+  private checkMinimumLength(): void {
+    if (this._value.length < 8) {
       throw new InvalidPasswordException(
         'Password must be at least 8 characters long',
       );
     }
   }
 
-  private checkCommonPasswords(value: string): void {
+  private checkCommonPasswords(): void {
     const commonPasswords = [
       'password',
       '123456',
@@ -107,7 +109,7 @@ export class PasswordValueObject {
       'monkey',
     ];
 
-    if (commonPasswords.includes(value.toLowerCase())) {
+    if (commonPasswords.includes(this._value.toLowerCase())) {
       throw new InvalidPasswordException(
         'Password is too common, please choose a stronger password',
       );

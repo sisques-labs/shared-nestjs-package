@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 
 import { InvalidUuidException } from '@/shared/domain/exceptions/value-objects/invalid-uuid/invalid-uuid.exception';
+import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
 
 /**
  * UUID Value Object
@@ -9,12 +10,13 @@ import { InvalidUuidException } from '@/shared/domain/exceptions/value-objects/i
  * @param value - The UUID string.
  * @returns A new instance of the UuidValueObject.
  */
-export class UuidValueObject {
+export class UuidValueObject extends ValueObject<string> {
   private readonly _value: string;
 
   constructor(value?: string) {
+    super();
     this._value = value ?? randomUUID();
-    this.validate(this._value);
+    this.validate();
   }
 
   public get value(): string {
@@ -55,23 +57,23 @@ export class UuidValueObject {
     return new UuidValueObject();
   }
 
-  private validate(value: string): void {
-    this.checkIsEmpty(value);
-    this.checkIsValidUuid(value);
+  protected validate(): void {
+    this.checkIsEmpty();
+    this.checkIsValidUuid();
   }
 
-  private checkIsEmpty(value: string): void {
-    if (!value || value.trim() === '') {
+  private checkIsEmpty(): void {
+    if (!this._value || this._value.trim() === '') {
       throw new InvalidUuidException('UUID cannot be empty');
     }
   }
 
-  private checkIsValidUuid(value: string): void {
+  private checkIsValidUuid(): void {
     // RFC 4122 compliant UUID regex
     const uuidPattern =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-    if (!uuidPattern.test(value)) {
+    if (!uuidPattern.test(this._value)) {
       throw new InvalidUuidException('Invalid UUID format');
     }
   }

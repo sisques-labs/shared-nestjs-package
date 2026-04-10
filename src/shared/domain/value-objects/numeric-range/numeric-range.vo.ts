@@ -1,16 +1,18 @@
 import { InvalidNumericRangeException } from '@/shared/domain/exceptions/value-objects/invalid-numeric-range/invalid-numeric-range.exception';
 import { INumericRange } from '@/shared/domain/interfaces/numeric-range.interface';
+import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
 
 /**
  * NumericRange Value Object
  * Base class for value objects representing a numeric range with min and max bounds.
  * Subclasses can override `validate()` to add domain-specific constraints.
  */
-export class NumericRangeValueObject {
+export class NumericRangeValueObject extends ValueObject<INumericRange> {
   protected readonly _min: number;
   protected readonly _max: number;
 
   constructor(range: INumericRange) {
+    super();
     this._min = range.min;
     this._max = range.max;
     this.validate();

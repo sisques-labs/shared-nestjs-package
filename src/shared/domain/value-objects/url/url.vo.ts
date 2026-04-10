@@ -1,4 +1,5 @@
 import { InvalidUrlException } from '@/shared/domain/exceptions/value-objects/invalid-url/invalid-url.exception';
+import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
 
 /**
  * Url Value Object
@@ -7,35 +8,32 @@ import { InvalidUrlException } from '@/shared/domain/exceptions/value-objects/in
  * @param value - The URL of the resource.
  * @returns A new instance of the UrlValueObject.
  */
-export class UrlValueObject {
+export class UrlValueObject extends ValueObject<string> {
   private readonly _value: string;
 
   constructor(value: string) {
-    this.validate(value);
+    super();
     this._value = value;
+    this.validate();
   }
 
   public get value(): string {
     return this._value;
   }
 
-  public equals(other: UrlValueObject): boolean {
-    return this._value === other._value;
+  protected validate(): void {
+    this.checkIsEmpty();
+    this.checkIsUrl();
   }
 
-  private validate(value: string): void {
-    this.checkIsEmpty(value);
-    this.checkIsUrl(value);
-  }
-
-  private checkIsEmpty(value: string): void {
-    if (!value) {
+  private checkIsEmpty(): void {
+    if (!this._value) {
       throw new InvalidUrlException('URL cannot be empty');
     }
   }
 
-  private checkIsUrl(value: string): void {
-    if (!value.startsWith('http')) {
+  private checkIsUrl(): void {
+    if (!this._value.startsWith('http')) {
       throw new InvalidUrlException('URL must start with http');
     }
   }

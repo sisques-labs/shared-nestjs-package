@@ -1,4 +1,5 @@
 import { InvalidNumberException } from '@/shared/domain/exceptions/value-objects/invalid-number/invalid-number.exception';
+import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
 
 /**
  * Number Value Object
@@ -7,7 +8,7 @@ import { InvalidNumberException } from '@/shared/domain/exceptions/value-objects
  * @param value - The numeric value.
  * @returns A new instance of the NumberValueObject.
  */
-export class NumberValueObject {
+export class NumberValueObject extends ValueObject<number> {
   private readonly _value: number;
 
   constructor(
@@ -19,6 +20,7 @@ export class NumberValueObject {
       precision?: number;
     } = {},
   ) {
+    super();
     this._value = this.parseValue(value);
     this.validate();
   }
@@ -88,7 +90,7 @@ export class NumberValueObject {
     return value;
   }
 
-  private validate(): void {
+  protected validate(): void {
     this.checkIsFinite();
     this.checkRange();
     this.checkDecimals();

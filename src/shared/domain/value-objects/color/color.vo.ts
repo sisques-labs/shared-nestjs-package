@@ -1,4 +1,5 @@
 import { InvalidColorException } from '@/shared/domain/exceptions/value-objects/invalid-color/invalid-color.exception';
+import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
 
 /**
  * Color Value Object
@@ -7,20 +8,17 @@ import { InvalidColorException } from '@/shared/domain/exceptions/value-objects/
  * @param value - The color value.
  * @returns A new instance of the ColorValueObject.
  */
-export class ColorValueObject {
+export class ColorValueObject extends ValueObject<string> {
   private readonly _value: string;
 
   constructor(value: string) {
-    this.validate(value);
-    this._value = this.normalize(value);
+    super();
+    this._value = (value ?? '').trim().toLowerCase();
+    this.validate();
   }
 
   public get value(): string {
     return this._value;
-  }
-
-  public equals(other: ColorValueObject): boolean {
-    return this._value === other._value;
   }
 
   /**
@@ -107,18 +105,18 @@ export class ColorValueObject {
     return /^hsl\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*\)$/.test(this._value);
   }
 
-  private validate(value: string): void {
-    this.checkIsEmpty(value);
-    this.checkIsValidColor(value);
+  protected validate(): void {
+    this.checkIsEmpty();
+    this.checkIsValidColor();
   }
 
-  private checkIsEmpty(value: string): void {
-    if (!value || value.trim() === '') {
+  private checkIsEmpty(): void {
+    if (!this._value || this._value.trim() === '') {
       throw new InvalidColorException('Color cannot be empty');
     }
   }
 
-  private checkIsValidColor(value: string): void {
+  private checkIsValidColor(): void {
     const hexPattern = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
     const rgbPattern = /^rgb\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)$/;
     const hslPattern = /^hsl\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*\)$/;
@@ -140,20 +138,16 @@ export class ColorValueObject {
       'magenta',
     ];
 
-    const isHex = hexPattern.test(value);
-    const isRgb = rgbPattern.test(value);
-    const isHsl = hslPattern.test(value);
-    const isNamed = namedColors.includes(value.toLowerCase());
+    const isHex = hexPattern.test(this._value);
+    const isRgb = rgbPattern.test(this._value);
+    const isHsl = hslPattern.test(this._value);
+    const isNamed = namedColors.includes(this._value);
 
     if (!isHex && !isRgb && !isHsl && !isNamed) {
       throw new InvalidColorException(
         'Invalid color format. Supported formats: hex (#fff, #ffffff), rgb(r,g,b), hsl(h,s%,l%), or named colors',
       );
     }
-  }
-
-  private normalize(value: string): string {
-    return value.trim().toLowerCase();
   }
 
   private rgbToHex(): string {
