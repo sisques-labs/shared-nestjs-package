@@ -1,35 +1,43 @@
 /**
  * Abstract base class for all Value Objects in the domain.
  *
- * Value Objects are immutable, self-validating objects identified by their
- * value rather than their identity. All concrete Value Objects must extend
- * this class and implement the {@link validate} method.
+ * Value Objects are immutable, self-validating objects that are compared
+ * by their value rather than identity.
+ * All concrete Value Objects must extend this class and implement {@link validate}.
  *
- * @typeParam T - The primitive or composite type that this Value Object wraps.
+ * @template T The primitive or composite type the ValueObject wraps.
+ * @public
  */
 export abstract class ValueObject<T> {
   /**
-   * Returns the raw wrapped value.
+   * Gets the raw wrapped value.
+   *
+   * @returns {T} The encapsulated value.
+   * @public
+   * @readonly
    */
-  abstract get value(): T;
+  public abstract get value(): T;
 
   /**
-   * Validates the internal state of the Value Object.
+   * Validates the internal state of the ValueObject.
    *
-   * Implementations must throw a domain exception when the value is invalid.
-   * This method MUST be called at the end of every concrete constructor, after
-   * all fields have been assigned.
+   * Implementations must throw a domain-specific exception if the value is invalid.
+   * This method MUST be called at the end of every concrete constructor, after all fields are assigned.
+   *
+   * @protected
+   * @abstract
+   * @throws {Error} Concrete implementations should throw a domain exception type when invalid.
    */
   protected abstract validate(): void;
 
   /**
-   * Structural equality: two Value Objects are equal when their wrapped values
-   * are deeply equal.
+   * Structural equality based on the wrapped value.
    *
-   * Subclasses may override this when they need a custom comparison (e.g.
-   * case-insensitive string equality).
+   * Subclasses may override to compare semantically (for instance, case-insensitive strings or fuzzy matches).
    *
-   * @param other - The other Value Object to compare with.
+   * @param other The other ValueObject to compare with.
+   * @returns {boolean} `true` if both value objects are equal by wrapped value, otherwise `false`.
+   * @public
    */
   public equals(other: ValueObject<T>): boolean {
     if (!(other instanceof ValueObject)) return false;
@@ -37,10 +45,13 @@ export abstract class ValueObject<T> {
   }
 
   /**
-   * Returns a plain serialisable copy of the wrapped value.
+   * Creates a deeply serializable/plain copy of the wrapped value.
    *
-   * For primitive types this is the same as {@link value}. For complex types
-   * (e.g. objects) it returns a deep copy suitable for persistence or transfer.
+   * For primitives, this returns the value unchanged.
+   * For objects, returns a deep clone suitable for transport or persistence.
+   *
+   * @returns {T} The plain representation.
+   * @public
    */
   public toPrimitives(): T {
     const v = this.value;
@@ -51,6 +62,9 @@ export abstract class ValueObject<T> {
 
   /**
    * Returns a human-readable string representation of the wrapped value.
+   *
+   * @returns {string} String representation.
+   * @public
    */
   public toString(): string {
     const v = this.value;
@@ -60,7 +74,10 @@ export abstract class ValueObject<T> {
   }
 
   /**
-   * Returns `true` when the wrapped value is neither `null` nor `undefined`.
+   * Indicates whether the wrapped value is neither `null` nor `undefined`.
+   *
+   * @returns {boolean} `true` if value is defined.
+   * @public
    */
   public isDefined(): boolean {
     const v = this.value;
@@ -68,7 +85,10 @@ export abstract class ValueObject<T> {
   }
 
   /**
-   * Returns `true` when the wrapped value is `null` or `undefined`.
+   * Indicates whether the wrapped value is `null` or `undefined`.
+   *
+   * @returns {boolean} `true` if value is null or undefined.
+   * @public
    */
   public isNullOrUndefined(): boolean {
     return !this.isDefined();
