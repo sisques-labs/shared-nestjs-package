@@ -141,19 +141,11 @@ For contributors working on this repository:
 
 ## Module Setup
 
-Import **`SharedModule`** in your root or core module. It is **`@Global()`** and only registers cross-cutting pieces that do not require a database (for example **`MutationResponseGraphQLMapper`** and shared GraphQL enum registration). It does **not** import MongoDB or TypeORM—you add those only if you need them.
+The library is **opt-in by feature**. Import **`MongoModule`**, **`TypeOrmModule`**, GraphQL pieces (DTOs, **`registerSharedGraphqlEnums`**, mappers, plugins), and domain exports only when you need them.
 
-```typescript
-import { Module } from '@nestjs/common';
-import { SharedModule } from '@sisques-labs/nestjs-kit';
+**`SharedModule`** is an optional **empty** `Module` kept for backward compatibility; it registers **no** providers and is **not** `@Global()`.
 
-@Module({
-  imports: [SharedModule],
-})
-export class AppModule {}
-```
-
-**Optional database modules** (import alongside `SharedModule` when you use them):
+**Optional database modules:**
 
 - **`MongoModule`** — provides `MongoMasterService` (`MONGODB_URI`, `MONGODB_DATABASE` via `ConfigService`).
 - **`TypeOrmModule`** — registers `TypeOrmModule.forRootAsync` using `DATABASE_*` config; requires **`ConfigModule`** in the app (for example `ConfigModule.forRoot({ isGlobal: true })`).
@@ -161,16 +153,11 @@ export class AppModule {}
 ```typescript
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import {
-  SharedModule,
-  MongoModule,
-  TypeOrmModule,
-} from '@sisques-labs/nestjs-kit';
+import { MongoModule, TypeOrmModule } from '@sisques-labs/nestjs-kit';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    SharedModule,
     MongoModule, // omit if you do not use MongoDB
     TypeOrmModule, // omit if you do not use TypeORM
   ],
@@ -607,6 +594,14 @@ type UserTypeormDto = BaseTypeormDto & {
 
 ## Transport Layer (GraphQL)
 
+If you use **`@nestjs/graphql`**, call **`registerSharedGraphqlEnums()`** once before schema generation (for example at the top of `main.ts` before `NestFactory.create`, or from a small module imported by `AppModule`). Add **`MutationResponseGraphQLMapper`** and **`ComplexityPlugin`** to your own GraphQL module’s **`providers`** when you use them—this package does **not** register them via **`SharedModule`**.
+
+```typescript
+import { registerSharedGraphqlEnums } from '@sisques-labs/nestjs-kit';
+
+registerSharedGraphqlEnums();
+```
+
 ### Input DTOs
 
 #### `BaseFindByCriteriaInput`
@@ -689,10 +684,15 @@ deleteUsers(@Args('ids', { type: () => [String] }) ids: string[]): Promise<Mutat
 
 ### Mappers
 
-`MutationResponseGraphQLMapper` is a NestJS injectable service provided by `SharedModule` that maps domain results to `MutationResponseDto`.
+`MutationResponseGraphQLMapper` is a NestJS injectable that maps domain results to `MutationResponseDto`. Register it in the module that declares your resolvers (or a dedicated GraphQL module).
 
 ```typescript
 import { MutationResponseGraphQLMapper } from '@sisques-labs/nestjs-kit';
+
+@Module({
+  providers: [MutationResponseGraphQLMapper, UserResolver],
+})
+export class UserGraphqlModule {}
 
 @Resolver()
 export class UserResolver {
@@ -710,7 +710,7 @@ export class UserResolver {
 
 ### Complexity Plugin
 
-`ComplexityPlugin` is an **Apollo Server plugin** (`@Plugin()` from `@nestjs/apollo`) that rejects operations whose estimated complexity exceeds **1000** (see `graphql-query-complexity`). It is **exported** from this package but **not** registered inside `SharedModule`—add it to your GraphQL module’s **`providers`** (or equivalent) so Nest discovers the plugin.
+`ComplexityPlugin` is an **Apollo Server plugin** (`@Plugin()` from `@nestjs/apollo`) that rejects operations whose estimated complexity exceeds **1000** (see `graphql-query-complexity`). It is **exported** from this package—add it to your GraphQL module’s **`providers`** (or equivalent) so Nest discovers the plugin.
 
 To assign complexity weights to fields use the `@Complexity` decorator from `@nestjs/graphql`:
 
@@ -740,6 +740,8 @@ export class GraphqlPluginsModule {}
 ---
 
 ## Enums
+
+TypeScript enums are exported for domain and GraphQL use. For GraphQL schema generation, call **`registerSharedGraphqlEnums()`** once (see [Transport Layer (GraphQL)](#transport-layer-graphql)).
 
 ```typescript
 import {

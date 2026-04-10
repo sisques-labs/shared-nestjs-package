@@ -1,6 +1,3 @@
-// Module
-export * from './shared/shared.module';
-
 // ─── Application ─────────────────────────────────────────────────────────────
 
 export * from './shared/application/commands/base/base-command.handler';
@@ -95,8 +92,8 @@ export * from './shared/domain/view-models/base-view-model/base-view-model';
 export * from './shared/infrastructure/database/base-database.repository';
 
 // Logging (Winston config for nest-winston / winston.createLogger)
-export * from './shared/infrastructure/logging/formats/shared-winston.formats';
 export * from './shared/infrastructure/logging/factories/create-shared-winston-logger-options';
+export * from './shared/infrastructure/logging/formats/shared-winston.formats';
 export * from './shared/infrastructure/logging/interfaces/shared-winston-logger-factory-options.interface';
 
 // MongoDB
@@ -115,6 +112,9 @@ export * from './shared/infrastructure/database/typeorm/typeorm-module-options.f
 export * from './shared/infrastructure/database/typeorm/typeorm.module';
 
 // ─── Transport ────────────────────────────────────────────────────────────────
+
+// GraphQL - Enum registration (opt-in; call before schema generation)
+export * from './shared/transport/graphql/register-shared-graphql-enums';
 
 // GraphQL - DTOs (Requests)
 export * from './shared/transport/graphql/dtos/requests/base-filter/base-filter.input';

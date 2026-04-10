@@ -1,21 +1,12 @@
 import { registerEnumType } from '@nestjs/graphql';
 
 import { FilterOperator } from '@/shared/domain/enums/filter-operator.enum';
+import { LengthUnitEnum } from '@/shared/domain/enums/length-unit/length-unit.enum';
 import { SortDirection } from '@/shared/domain/enums/sort-direction.enum';
 import { UserRoleEnum } from '@/shared/domain/enums/user-context/user/user-role/user-role.enum';
 import { UserStatusEnum } from '@/shared/domain/enums/user-context/user/user-status/user-status.enum';
 
-/**
- * Registers shared GraphQL enums.
- *
- * @remarks
- * Each module should register its own enums in its own module file.
- * This file only contains shared enums.
- *
- * TODO: Move UserRoleEnum and UserStatusEnum to user module
- */
-const registeredEnums = [
-  // Shared enums
+const DEFINITIONS = [
   {
     enum: FilterOperator,
     name: 'FilterOperator',
@@ -26,7 +17,11 @@ const registeredEnums = [
     name: 'SortDirection',
     description: 'The direction to sort by',
   },
-  // User module enums (TODO: Move to user module)
+  {
+    enum: LengthUnitEnum,
+    name: 'LengthUnitEnum',
+    description: 'The unit of the length',
+  },
   {
     enum: UserRoleEnum,
     name: 'UserRoleEnum',
@@ -37,8 +32,20 @@ const registeredEnums = [
     name: 'UserStatusEnum',
     description: 'The status of the user',
   },
-];
+] as const;
 
-for (const { enum: enumType, name, description } of registeredEnums) {
-  registerEnumType(enumType, { name, description });
+let registered = false;
+
+/**
+ * Registers kit GraphQL enums with Nest (`registerEnumType`).
+ * Call once before GraphQL schema generation (e.g. at app bootstrap or from your GraphQL module).
+ */
+export function registerSharedGraphqlEnums(): void {
+  if (registered) {
+    return;
+  }
+  registered = true;
+  for (const { enum: enumType, name, description } of DEFINITIONS) {
+    registerEnumType(enumType, { name, description });
+  }
 }
