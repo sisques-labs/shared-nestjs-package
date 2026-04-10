@@ -1,19 +1,21 @@
 # @sisques-labs/shared-nestjs
 
-Shared NestJS library providing Domain-Driven Design (DDD) and CQRS building blocks, validated value objects, repository abstractions, and GraphQL utilities for use across microservices and modular monolith projects.
+Shared NestJS library providing **Domain-Driven Design (DDD)** and **CQRS** building blocks, **validated value objects**, **repository abstractions**, optional **MongoDB** and **TypeORM** helpers, **GraphQL** DTOs and plugins, and optional **Winston** logging (`nest-winston`) for microservices and modular monoliths.
 
 ## Table of Contents
 
 - [Publishing](#publishing)
-  - [Setup](#setup)
-  - [Releasing a new version](#releasing-a-new-version)
+  - [CI](#ci)
+  - [Release workflow](#release-workflow)
+  - [Publish from your machine](#publish-from-your-machine)
 - [Installation](#installation)
 - [Peer Dependencies](#peer-dependencies)
+- [Local development](#local-development)
 - [Module Setup](#module-setup)
 - [Domain Layer](#domain-layer)
   - [Base Aggregate](#base-aggregate)
   - [Value Objects](#value-objects)
-  - [Domain Identifiers](#domain-identifiers)
+  - [Aggregate and entity IDs](#aggregate-and-entity-ids)
   - [Domain Exceptions](#domain-exceptions)
   - [Criteria & Pagination](#criteria--pagination)
   - [Repository Interfaces](#repository-interfaces)
@@ -38,143 +40,106 @@ Shared NestJS library providing Domain-Driven Design (DDD) and CQRS building blo
 
 ## Publishing
 
-This package is published to **GitHub Packages** under the `@sisques-labs` scope and managed via two GitHub Actions workflows.
+The package is published to the **public [npm registry](https://www.npmjs.com/)** as `@sisques-labs/shared-nestjs` (see `publishConfig` in `package.json`). Releases are automated with GitHub Actions.
 
 | Workflow | File | Trigger |
 |---|---|---|
-| **CI** | `.github/workflows/ci.yml` | Every push to `main` and every PR |
+| **CI** | `.github/workflows/ci.yml` | Push and pull requests targeting `main` |
 | **Release** | `.github/workflows/release.yml` | Manual (`workflow_dispatch`) |
 
-### CI Workflow
+### CI
 
-Runs automatically on every push to `main` and on every pull request. Executes lint, build, and tests to ensure the codebase is always healthy.
+Runs `pnpm install --frozen-lockfile`, **`pnpm lint`** (ESLint with `--fix`), **`pnpm build`**, and **`pnpm test`**.
 
-### Release Workflow
+### Release workflow
 
-Triggered manually from **GitHub → Actions → Release → Run workflow**.
+Open **GitHub → Actions → Release → Run workflow** and choose:
 
-Steps it performs automatically:
-1. Lint + test (as a safety gate)
-2. Bump `package.json` version (`patch`, `minor`, or `major`)
-3. Build (`dist/`)
-4. Publish to GitHub Packages
-5. Commit the version bump, create a git tag, and push to `main`
-6. Create a GitHub Release with auto-generated release notes
+| Input | Purpose |
+|---|---|
+| **version** | `patch`, `minor`, or `major` ([SemVer](https://semver.org)) |
+| **release_type** | `stable` (default dist-tag) or prerelease **`alpha`** / **`beta`** (separate dist-tags) |
 
-The only input required is the version type:
+The job then: runs lint and tests, bumps the version with `npm version`, builds, publishes with **`pnpm publish`** using the **`NPM_TOKEN`** repository secret, commits `package.json` / lockfile, creates a git tag, pushes to `main`, and creates a GitHub Release with generated notes.
 
-```
-patch  →  0.0.1 → 0.0.2   (bug fixes)
-minor  →  0.0.1 → 0.1.0   (new features, backwards compatible)
-major  →  0.0.1 → 1.0.0   (breaking changes)
-```
+**Repository setup:** add an [npm automation token](https://docs.npmjs.com/creating-and-viewing-access-tokens) with publish rights as the **`NPM_TOKEN`** secret (GitHub → Settings → Secrets and variables → Actions).
 
-No manual `pnpm version` or `pnpm publish` needed — the workflow handles everything.
-
-### First-time Setup (local publishing only)
-
-> The release workflow uses the built-in `GITHUB_TOKEN` automatically — no secrets configuration needed in GitHub. This section is only needed to publish from your local machine.
-
-**1. Create a GitHub Personal Access Token**
-
-Go to: GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token
-
-Required scopes:
-- `write:packages` — to publish
-- `read:packages` — to install in other projects
-
-**2. Export the token as an environment variable**
-
-The `.npmrc` in this repo reads the token from `NODE_AUTH_TOKEN`:
+### Publish from your machine
 
 ```bash
-export NODE_AUTH_TOKEN=YOUR_GITHUB_TOKEN
-```
-
-Add this to your shell profile (`~/.zshrc` or `~/.bashrc`) to make it permanent.
-
-**3. Publish**
-
-```bash
+npm login
+pnpm build
 pnpm publish
 ```
 
-The `prepublishOnly` script runs `pnpm build` automatically before publishing, so `dist/` is always up to date.
-
----
-
-### Releasing a new version
-
-Follow [Semantic Versioning](https://semver.org):
-
-```bash
-pnpm version patch   # bug fixes:        0.0.1 → 0.0.2
-pnpm version minor   # new features:     0.0.1 → 0.1.0
-pnpm version major   # breaking changes: 0.0.1 → 1.0.0
-```
-
-This updates `package.json` and creates a git tag automatically. Then publish:
-
-```bash
-pnpm publish
-```
+The `prepublishOnly` script runs **`npm run build`** before publish so `dist/` is current.
 
 ---
 
 ## Installation
 
-This package is hosted on GitHub Packages. Before installing, configure your project to resolve the `@sisques-labs` scope from the GitHub registry.
-
-**1. Add a `.npmrc` file to the root of your project:**
-
-```
-@sisques-labs:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
-```
-
-Set the `GITHUB_TOKEN` environment variable to a GitHub Personal Access Token with at least `read:packages` scope (see [Publishing → Setup](#setup)).
-
-**2. Install the package:**
+The package is **public** on npm; a normal install is enough:
 
 ```bash
-npm install @sisques-labs/shared-nestjs
-# or
 pnpm add @sisques-labs/shared-nestjs
-# or
-yarn add @sisques-labs/shared-nestjs
+# or: npm install / yarn add @sisques-labs/shared-nestjs
 ```
+
+Use your organization’s registry or mirror policy if applicable.
 
 ---
 
 ## Peer Dependencies
 
-Install the peer dependencies for the features you need. All database and GraphQL dependencies are optional.
+Install only what your app uses. Peers marked **optional** in `peerDependenciesMeta` can be omitted if you do not import that part of the library.
 
 ```bash
-# Core NestJS (always required)
-npm install @nestjs/common @nestjs/core reflect-metadata rxjs
+# Core NestJS (required for any integration)
+pnpm add @nestjs/common @nestjs/core reflect-metadata rxjs
 
-# CQRS support
-npm install @nestjs/cqrs
+# CQRS (command handlers, EventBus)
+pnpm add @nestjs/cqrs
 
-# MongoDB support
-npm install mongodb @nestjs/config
+# MongoDB module + repositories in this package
+pnpm add mongodb @nestjs/config
 
-# TypeORM support
-npm install typeorm @nestjs/typeorm @nestjs/config
+# TypeORM module + repositories in this package
+pnpm add typeorm @nestjs/typeorm @nestjs/config
 
-# GraphQL support
-npm install graphql @nestjs/graphql @nestjs/apollo @apollo/server graphql-query-complexity
+# GraphQL DTOs, Apollo, complexity plugin
+pnpm add graphql @nestjs/graphql @nestjs/apollo @apollo/server graphql-query-complexity
 
-# Validation (required for GraphQL DTOs)
-npm install class-validator class-transformer
+# class-validator / class-transformer (typical for GraphQL inputs)
+pnpm add class-validator class-transformer
+
+# Winston logging (SharedWinstonModule, factories, formats)
+pnpm add nest-winston winston winston-daily-rotate-file
 ```
 
 ---
 
+## Local development
+
+For contributors working on this repository:
+
+| Script | Description |
+|---|---|
+| `pnpm install` | Installs dependencies; **`prepare`** runs Husky and **`pnpm build`**. |
+| `pnpm build` | Compiles TypeScript to `dist/` (`nest build`). |
+| `pnpm lint` | ESLint with `--fix` on `src`, `apps`, `libs`, `test`. |
+| `pnpm lint:check` | ESLint without autofix (used by **Husky pre-commit**). |
+| `pnpm test` | Jest unit tests (`*.spec.ts` under `src/`). |
+| `pnpm test:cov` | Tests with coverage. |
+| `pnpm format` | Prettier on `src` and `test` TypeScript. |
+
+**Git hooks:** [Husky](https://typicode.github.io/husky/) runs **`pnpm lint:check`** and **`pnpm test`** on **pre-commit** (see `.husky/pre-commit`). To skip hooks for a one-off commit: `HUSKY=0 git commit ...`.
+
+---
+
+
 ## Module Setup
 
-Import `SharedModule` into your application module. It is a global module, so its providers (MongoDB and TypeORM services, mappers) are available throughout the application without re-importing.
+Import **`SharedModule`** in your root or core module. It is **`@Global()`**, so exported providers (for example `MongoMasterService`, `TypeormMasterService`, `MutationResponseGraphQLMapper`) are visible across the app without re-importing the module.
 
 ```typescript
 import { Module } from '@nestjs/common';
@@ -186,7 +151,9 @@ import { SharedModule } from '@sisques-labs/shared-nestjs';
 export class AppModule {}
 ```
 
-`SharedModule` automatically initializes both `MongoModule` and `TypeOrmModule`. Configure them via environment variables or `@nestjs/config` in your app.
+`SharedModule` wires **`MongoModule`** and **`TypeOrmModule`**. Configure database connections in **your** application (`MONGO_URI`, `MONGO_DB_NAME`, TypeORM `DataSource`, etc.); this library only provides helpers and services that read that configuration.
+
+**Logging is separate:** `SharedWinstonModule` is **not** part of `SharedModule`. Opt in by importing it (or `WinstonModule` with `createSharedWinstonLoggerOptions`) where you configure logging—see [Logging (Winston)](#logging-winston).
 
 ---
 
@@ -194,25 +161,33 @@ export class AppModule {}
 
 ### Base Aggregate
 
-`BaseAggregate` extends NestJS's `AggregateRoot` and provides `createdAt` and `updatedAt` value objects out of the box. All domain aggregates should extend it.
+`BaseAggregate` extends `@nestjs/cqrs` **`AggregateRoot`** and wires **`createdAt`** and **`updatedAt`** as `DateValueObject` properties. Add identity and domain fields in your subclass (for example a `UuidValueObject` or app-specific id type).
 
 ```typescript
-import { BaseAggregate } from '@sisques-labs/shared-nestjs';
+import {
+  BaseAggregate,
+  DateValueObject,
+  EmailValueObject,
+  UuidValueObject,
+} from '@sisques-labs/shared-nestjs';
 
 export class UserAggregate extends BaseAggregate {
-  private _email: EmailValueObject;
-
   constructor(
-    id: UserUuidValueObject,
-    email: EmailValueObject,
+    private readonly _id: UuidValueObject,
+    private _email: EmailValueObject,
     createdAt: DateValueObject,
     updatedAt: DateValueObject,
   ) {
-    super(id, createdAt, updatedAt);
-    this._email = email;
+    super(createdAt, updatedAt);
+  }
+
+  get id(): UuidValueObject {
+    return this._id;
   }
 }
 ```
+
+Use `apply()`, `commit()`, and related `AggregateRoot` APIs for domain events as usual.
 
 ---
 
@@ -248,7 +223,7 @@ All value objects are immutable and validate their input on construction, throwi
 | `TimezoneValueObject` | IANA timezone |
 | `PhoneCodeValueObject` | Phone dial code |
 | `LengthUnitValueObject` | Unit of length measurement |
-| `DimensionsValueObject` | Width/height dimensions |
+| `DimensionsValueObject` | Length, width, height with unit and optional bounds |
 | `NumericRangeValueObject` | Min/max numeric range |
 
 **Usage example:**
@@ -271,24 +246,23 @@ console.log(password.getStrengthScore()); // number 0-5
 console.log(password.meetsRequirements()); // boolean
 ```
 
+Many value objects also have a **folder-level `README.md`** under `src/shared/domain/value-objects/<name>/` with API tables and examples.
+
 ---
 
-### Domain Identifiers
+### Aggregate and entity IDs
 
-Typed UUID wrappers for each aggregate root, all extending `UuidValueObject`.
+The library exports **`UuidValueObject`** for validated RFC 4122 UUID strings (construction, `generate()`, `getVersion()`, `isNil()`, etc.).
 
-| Class | Aggregate |
-|---|---|
-| `UserUuidValueObject` | User |
-| `AuthUuidValueObject` | Auth |
-| `PlantUuidValueObject` | Plant |
-| `PlantSpeciesUuidValueObject` | Plant Species |
-| `GrowingUnitUuidValueObject` | Growing Unit |
-| `LocationUuidValueObject` | Location |
-| `OverviewUuidValueObject` | Overview |
-| `SagaInstanceUuidValueObject` | Saga Instance |
-| `SagaStepUuidValueObject` | Saga Step |
-| `SagaLogUuidValueObject` | Saga Log |
+For **aggregate- or entity-specific** identifiers (nominal typing per bounded context), define thin subclasses or wrappers **in your application**, for example:
+
+```typescript
+import { UuidValueObject } from '@sisques-labs/shared-nestjs';
+
+export class UserId extends UuidValueObject {
+  // optional: narrow type or factory methods for your domain
+}
+```
 
 ---
 
@@ -463,9 +437,11 @@ export class UserService implements IBaseService {}
 
 ### Logging (Winston)
 
-Optional **structured logging** via Winston, daily log rotation, and `nest-winston`. Install peers `nest-winston`, `winston`, and `winston-daily-rotate-file` in the consuming app, then use `SharedWinstonModule` and helpers such as `createSharedWinstonLoggerOptions`.
+Optional **structured logging** via Winston, **daily log rotation**, and **`nest-winston`**. Install peers `nest-winston`, `winston`, and `winston-daily-rotate-file` in the consuming app.
 
-**Full guide (setup, async config, extension patterns):** [src/shared/infrastructure/logging/README.md](src/shared/infrastructure/logging/README.md)
+**Main exports:** `SharedWinstonModule` (`forRoot` / `forRootAsync`), `createSharedWinstonLoggerOptions`, `mergeSharedWinstonLoggerOptions`, `createSharedJsonLogFormat`, `createSharedConsoleLogFormat`, and related TypeScript option interfaces.
+
+**Full guide:** [src/shared/infrastructure/logging/README.md](src/shared/infrastructure/logging/README.md)
 
 ---
 
@@ -698,7 +674,7 @@ export class UserResolver {
 
 ### Complexity Plugin
 
-`ComplexityPlugin` is an Apollo server plugin provided automatically by `SharedModule`. It validates query complexity on every request and rejects queries exceeding **1000 points**.
+`ComplexityPlugin` is an **Apollo Server plugin** (`@Plugin()` from `@nestjs/apollo`) that rejects operations whose estimated complexity exceeds **1000** (see `graphql-query-complexity`). It is **exported** from this package but **not** registered inside `SharedModule`—add it to your GraphQL module’s **`providers`** (or equivalent) so Nest discovers the plugin.
 
 To assign complexity weights to fields use the `@Complexity` decorator from `@nestjs/graphql`:
 
@@ -711,6 +687,18 @@ export class UserDto {
   @Complexity(1)
   id: string;
 }
+```
+
+Register the plugin (for example next to your GraphQL module):
+
+```typescript
+import { Module } from '@nestjs/common';
+import { ComplexityPlugin } from '@sisques-labs/shared-nestjs';
+
+@Module({
+  providers: [ComplexityPlugin],
+})
+export class GraphqlPluginsModule {}
 ```
 
 ---
