@@ -136,15 +136,15 @@ describe('DimensionsValueObject', () => {
     });
 
     it('should throw when any dimension is zero or negative', () => {
-      expect(() => new DimensionsValueObject({ ...validInput(), length: 0 })).toThrow(
-        'length must be greater than 0',
-      );
-      expect(() => new DimensionsValueObject({ ...validInput(), width: -1 })).toThrow(
-        'width must be greater than 0',
-      );
-      expect(() => new DimensionsValueObject({ ...validInput(), height: -0.1 })).toThrow(
-        'height must be greater than 0',
-      );
+      expect(
+        () => new DimensionsValueObject({ ...validInput(), length: 0 }),
+      ).toThrow('length must be greater than 0');
+      expect(
+        () => new DimensionsValueObject({ ...validInput(), width: -1 }),
+      ).toThrow('width must be greater than 0');
+      expect(
+        () => new DimensionsValueObject({ ...validInput(), height: -0.1 }),
+      ).toThrow('height must be greater than 0');
     });
 
     it('should enforce min option', () => {
@@ -154,16 +154,21 @@ describe('DimensionsValueObject', () => {
     });
 
     it('should enforce max option', () => {
-      expect(
-        () => new DimensionsValueObject(validInput(), { max: 4 }),
-      ).toThrow('length must be at most 4');
+      expect(() => new DimensionsValueObject(validInput(), { max: 4 })).toThrow(
+        'length must be at most 4',
+      );
     });
 
     it('should throw when allowDecimals is false and value is not integer', () => {
       expect(
         () =>
           new DimensionsValueObject(
-            { length: 10.5, width: 5, height: 3, unit: LengthUnitEnum.CENTIMETER },
+            {
+              length: 10.5,
+              width: 5,
+              height: 3,
+              unit: LengthUnitEnum.CENTIMETER,
+            },
             { allowDecimals: false },
           ),
       ).toThrow('length must be an integer');
@@ -173,7 +178,12 @@ describe('DimensionsValueObject', () => {
       expect(
         () =>
           new DimensionsValueObject(
-            { length: 10.123, width: 5, height: 3, unit: LengthUnitEnum.CENTIMETER },
+            {
+              length: 10.123,
+              width: 5,
+              height: 3,
+              unit: LengthUnitEnum.CENTIMETER,
+            },
             { precision: 2 },
           ),
       ).toThrow('length cannot have more than 2 decimal places');
@@ -201,7 +211,12 @@ describe('DimensionsValueObject', () => {
 
   describe('geometry helpers', () => {
     it('should compute volume, base area, surface and lateral surface', () => {
-      const d = new DimensionsValueObject({ length: 10, width: 5, height: 3, unit: LengthUnitEnum.CENTIMETER });
+      const d = new DimensionsValueObject({
+        length: 10,
+        width: 5,
+        height: 3,
+        unit: LengthUnitEnum.CENTIMETER,
+      });
 
       expect(d.getVolume()).toBe(150);
       expect(d.getBaseArea()).toBe(50);

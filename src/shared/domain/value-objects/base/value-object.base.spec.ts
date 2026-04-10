@@ -90,11 +90,15 @@ class TestCustomEqualityVO extends ValueObject<{ tags: string[] }> {
 describe('ValueObject', () => {
   describe('equals', () => {
     it('returns true for same primitive value', () => {
-      expect(new TestStringVO('hello').equals(new TestStringVO('hello'))).toBe(true);
+      expect(new TestStringVO('hello').equals(new TestStringVO('hello'))).toBe(
+        true,
+      );
     });
 
     it('returns false for different primitive value', () => {
-      expect(new TestStringVO('hello').equals(new TestStringVO('world'))).toBe(false);
+      expect(new TestStringVO('hello').equals(new TestStringVO('world'))).toBe(
+        false,
+      );
     });
 
     it('returns true for same object value', () => {
@@ -172,7 +176,9 @@ describe('ValueObject', () => {
     });
 
     it('validates composite VOs using aggregate rules', () => {
-      expect(() => new TestCompositeVO('   ', {})).toThrow('content cannot be empty');
+      expect(() => new TestCompositeVO('   ', {})).toThrow(
+        'content cannot be empty',
+      );
     });
   });
 });
