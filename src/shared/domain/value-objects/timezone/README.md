@@ -7,7 +7,7 @@ Represents an **IANA-style** timezone identifier string (e.g. `Europe/Madrid`, `
 ## Import
 
 ```typescript
-import { TimezoneValueObject, InvalidTimezoneException } from '@sisques-labs/shared-nestjs';
+import { TimezoneValueObject, InvalidTimezoneException } from '@sisques-labs/nestjs-kit';
 ```
 
 ---

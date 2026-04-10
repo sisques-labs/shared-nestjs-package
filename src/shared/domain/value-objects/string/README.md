@@ -7,7 +7,7 @@ Wraps a **string** with optional validation: length bounds, empty allowance, tri
 ## Import
 
 ```typescript
-import { StringValueObject, InvalidStringException } from '@sisques-labs/shared-nestjs';
+import { StringValueObject, InvalidStringException } from '@sisques-labs/nestjs-kit';
 ```
 
 ---

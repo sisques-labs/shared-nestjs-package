@@ -1,6 +1,6 @@
 # Logging (Winston configuration)
 
-This package exposes **Winston `LoggerOptions`** (formats, daily-rotate file, console) so your NestJS app can register logging with **`nest-winston`**’s `WinstonModule` yourself—same pattern as a local `winston.config.ts`, but centralized and reusable.
+**@sisques-labs/nestjs-kit** exposes **Winston `LoggerOptions`** (formats, daily-rotate file, console) so your NestJS app can register logging with **`nest-winston`**’s `WinstonModule` yourself—same pattern as a local `winston.config.ts`, but centralized and reusable.
 
 There is **no** `SharedWinstonModule` in this library: you import **`WinstonModule`** from `nest-winston` in **your** `LoggingModule` (or `AppModule`) and pass the shared config.
 
@@ -25,7 +25,7 @@ There is **no** `SharedWinstonModule` in this library: you import **`WinstonModu
 
 | Package | Role |
 |---------|------|
-| `@sisques-labs/shared-nestjs` | `createSharedWinstonLoggerOptions`, formats, merge helper |
+| `@sisques-labs/nestjs-kit` | `createSharedWinstonLoggerOptions`, formats, merge helper |
 | `nest-winston` | `WinstonModule.forRoot` / `forRootAsync` in **your** app |
 | `winston` | Peer of both; runtime logger |
 | `winston-daily-rotate-file` | Daily file transport; the factory uses `import 'winston-daily-rotate-file'` and `new winston.transports.DailyRotateFile(...)` (same as a hand-written `winston.config.ts`) |
@@ -37,7 +37,7 @@ There is **no** `SharedWinstonModule` in this library: you import **`WinstonModu
 ## Install in your project
 
 ```bash
-pnpm add @sisques-labs/shared-nestjs nest-winston winston winston-daily-rotate-file
+pnpm add @sisques-labs/nestjs-kit nest-winston winston winston-daily-rotate-file
 ```
 
 ---
@@ -48,7 +48,7 @@ pnpm add @sisques-labs/shared-nestjs nest-winston winston winston-daily-rotate-f
 
 ```typescript
 // winston.config.ts
-import { createSharedWinstonLoggerOptions } from '@sisques-labs/shared-nestjs';
+import { createSharedWinstonLoggerOptions } from '@sisques-labs/nestjs-kit';
 import type winston from 'winston';
 
 export const winstonConfig: winston.LoggerOptions =
@@ -92,7 +92,7 @@ If you do not need custom options at module load time:
 
 ```typescript
 import { WinstonModule } from 'nest-winston';
-import { defaultSharedWinstonLoggerOptions } from '@sisques-labs/shared-nestjs';
+import { defaultSharedWinstonLoggerOptions } from '@sisques-labs/nestjs-kit';
 
 @Module({
   imports: [WinstonModule.forRoot(defaultSharedWinstonLoggerOptions)],
@@ -111,7 +111,7 @@ export class LoggingModule {}
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
-import { createSharedWinstonLoggerOptions } from '@sisques-labs/shared-nestjs';
+import { createSharedWinstonLoggerOptions } from '@sisques-labs/nestjs-kit';
 
 @Module({
   imports: [
@@ -157,7 +157,7 @@ See **`SharedWinstonLoggerFactoryOptions`** in `shared-winston-logger-factory-op
 import {
   createSharedWinstonLoggerOptions,
   mergeSharedWinstonLoggerOptions,
-} from '@sisques-labs/shared-nestjs';
+} from '@sisques-labs/nestjs-kit';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 
@@ -183,7 +183,7 @@ export class LoggingModule {}
 import {
   createSharedJsonLogFormat,
   createSharedConsoleLogFormat,
-} from '@sisques-labs/shared-nestjs';
+} from '@sisques-labs/nestjs-kit';
 import * as winston from 'winston';
 
 export const winstonConfig: winston.LoggerOptions = {

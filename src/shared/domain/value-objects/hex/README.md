@@ -9,7 +9,7 @@ Extends [`ValueObject<string>`](../base/value-object.base.ts). Throws **`Invalid
 ## Import
 
 ```typescript
-import { HexValueObject, InvalidHexException } from '@sisques-labs/shared-nestjs';
+import { HexValueObject, InvalidHexException } from '@sisques-labs/nestjs-kit';
 ```
 
 ---

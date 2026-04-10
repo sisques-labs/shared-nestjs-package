@@ -9,7 +9,7 @@ Concrete value objects in the package (for example `NumberValueObject`, `StringV
 ## Import
 
 ```typescript
-import { ValueObject } from '@sisques-labs/shared-nestjs';
+import { ValueObject } from '@sisques-labs/nestjs-kit';
 ```
 
 ---
@@ -126,7 +126,7 @@ Useful for value objects whose type parameter allows optional presence (`T` incl
 ## Minimal subclass example
 
 ```typescript
-import { ValueObject } from '@sisques-labs/shared-nestjs';
+import { ValueObject } from '@sisques-labs/nestjs-kit';
 
 export class Code extends ValueObject<string> {
   private readonly _value: string;

@@ -8,13 +8,13 @@ It extends the shared [`ValueObject`](../base/value-object.base.ts) base type, s
 
 ## Import
 
-After installing `@sisques-labs/shared-nestjs`:
+After installing `@sisques-labs/nestjs-kit`:
 
 ```typescript
 import {
   NumberValueObject,
-} from '@sisques-labs/shared-nestjs';
-import { InvalidNumberException } from '@sisques-labs/shared-nestjs';
+} from '@sisques-labs/nestjs-kit';
+import { InvalidNumberException } from '@sisques-labs/nestjs-kit';
 ```
 
 (`InvalidNumberException` is thrown when validation fails; import it if you need to catch or map errors.)

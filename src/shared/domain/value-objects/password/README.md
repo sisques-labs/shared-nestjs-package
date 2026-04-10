@@ -9,7 +9,7 @@ Extends [`ValueObject<string>`](../base/value-object.base.ts). Throws **`Invalid
 ## Import
 
 ```typescript
-import { PasswordValueObject, InvalidPasswordException } from '@sisques-labs/shared-nestjs';
+import { PasswordValueObject, InvalidPasswordException } from '@sisques-labs/nestjs-kit';
 ```
 
 ---

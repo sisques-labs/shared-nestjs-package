@@ -9,7 +9,7 @@ The wrapped `value` is always a **string** (`ValueObject<string>` semantics for 
 ## Import
 
 ```typescript
-import { EnumValueObject, InvalidEnumValueException } from '@sisques-labs/shared-nestjs';
+import { EnumValueObject, InvalidEnumValueException } from '@sisques-labs/nestjs-kit';
 ```
 
 ---
@@ -18,7 +18,7 @@ import { EnumValueObject, InvalidEnumValueException } from '@sisques-labs/shared
 
 ```typescript
 import { MyEnum } from './my.enum';
-import { EnumValueObject } from '@sisques-labs/shared-nestjs';
+import { EnumValueObject } from '@sisques-labs/nestjs-kit';
 
 export class MyEnumValueObject extends EnumValueObject<typeof MyEnum> {
   protected get enumObject(): typeof MyEnum {

@@ -9,7 +9,7 @@ Extends [`ValueObject<string>`](../base/value-object.base.ts). Throws **`Invalid
 ## Import
 
 ```typescript
-import { UuidValueObject, InvalidUuidException } from '@sisques-labs/shared-nestjs';
+import { UuidValueObject, InvalidUuidException } from '@sisques-labs/nestjs-kit';
 ```
 
 ---

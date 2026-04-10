@@ -11,7 +11,7 @@ import {
   LengthUnitValueObject,
   LengthUnitEnum,
   InvalidEnumValueException,
-} from '@sisques-labs/shared-nestjs';
+} from '@sisques-labs/nestjs-kit';
 ```
 
 ---

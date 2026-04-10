@@ -7,7 +7,7 @@ Normalizes **`boolean`**, **`string`**, or **`number`** inputs into a strict `bo
 ## Import
 
 ```typescript
-import { BooleanValueObject, InvalidBooleanException } from '@sisques-labs/shared-nestjs';
+import { BooleanValueObject, InvalidBooleanException } from '@sisques-labs/nestjs-kit';
 ```
 
 ---

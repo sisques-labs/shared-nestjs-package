@@ -9,7 +9,7 @@ Throws **`InvalidStringException`** (from the string layer) when validation fail
 ## Import
 
 ```typescript
-import { SlugValueObject, InvalidStringException } from '@sisques-labs/shared-nestjs';
+import { SlugValueObject, InvalidStringException } from '@sisques-labs/nestjs-kit';
 ```
 
 ---

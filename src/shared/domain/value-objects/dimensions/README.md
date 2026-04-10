@@ -13,7 +13,7 @@ import {
   DimensionsValueObject,
   LengthUnitValueObject,
   InvalidDimensionsException,
-} from '@sisques-labs/shared-nestjs';
+} from '@sisques-labs/nestjs-kit';
 ```
 
 ---
@@ -74,7 +74,7 @@ Returns **`null`** if any required field is missing/blank, unless `throwOnInvali
 ## Example
 
 ```typescript
-import { LengthUnitEnum } from '@sisques-labs/shared-nestjs';
+import { LengthUnitEnum } from '@sisques-labs/nestjs-kit';
 
 const d = new DimensionsValueObject(
   { length: 10, width: 5, height: 3, unit: LengthUnitEnum.CENTIMETER },

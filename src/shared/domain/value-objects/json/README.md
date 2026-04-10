@@ -9,7 +9,7 @@ Extends [`ValueObject<Record<string, any>>`](../base/value-object.base.ts). Thro
 ## Import
 
 ```typescript
-import { JsonValueObject, InvalidJsonException } from '@sisques-labs/shared-nestjs';
+import { JsonValueObject, InvalidJsonException } from '@sisques-labs/nestjs-kit';
 ```
 
 ---

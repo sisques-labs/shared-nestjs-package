@@ -1,7 +1,7 @@
 {
-  "name": "@sisques-labs/shared-nestjs",
+  "name": "@sisques-labs/nestjs-kit",
   "version": "0.0.0",
-  "description": "Shared NestJS library with DDD/CQRS base classes, value objects, repository abstractions, and GraphQL utilities",
+  "description": "NestJS Kit with DDD/CQRS base classes, value objects, repository abstractions, and GraphQL utilities",
   "author": "JSisques",
   "private": false,
   "license": "MIT",

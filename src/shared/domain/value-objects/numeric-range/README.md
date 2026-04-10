@@ -12,8 +12,8 @@ It extends [`ValueObject<INumericRange>`](../base/value-object.base.ts). The wra
 import {
   NumericRangeValueObject,
   INumericRange,
-} from '@sisques-labs/shared-nestjs';
-import { InvalidNumericRangeException } from '@sisques-labs/shared-nestjs';
+} from '@sisques-labs/nestjs-kit';
+import { InvalidNumericRangeException } from '@sisques-labs/nestjs-kit';
 ```
 
 Use `InvalidNumericRangeException` when you need to catch or translate errors.

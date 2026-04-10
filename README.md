@@ -1,6 +1,6 @@
-# @sisques-labs/shared-nestjs
+# @sisques-labs/nestjs-kit
 
-Shared NestJS library providing **Domain-Driven Design (DDD)** and **CQRS** building blocks, **validated value objects**, **repository abstractions**, optional **MongoDB** and **TypeORM** helpers, **GraphQL** DTOs and plugins, and optional **Winston logger configuration** (for use with `nest-winston` in consuming apps) for microservices and modular monoliths.
+**NestJS Kit** — a shared NestJS library providing **Domain-Driven Design (DDD)** and **CQRS** building blocks, **validated value objects**, **repository abstractions**, optional **MongoDB** and **TypeORM** helpers, **GraphQL** DTOs and plugins, and optional **Winston logger configuration** (for use with `nest-winston` in consuming apps) for microservices and modular monoliths.
 
 ## Table of Contents
 
@@ -40,7 +40,7 @@ Shared NestJS library providing **Domain-Driven Design (DDD)** and **CQRS** buil
 
 ## Publishing
 
-The package is published to the **public [npm registry](https://www.npmjs.com/)** as `@sisques-labs/shared-nestjs` (see `publishConfig` in `package.json`). Releases are automated with GitHub Actions.
+The package is published to the public npm registry as [`@sisques-labs/nestjs-kit`](https://www.npmjs.com/package/@sisques-labs/nestjs-kit) (see `publishConfig` in `package.json`). Releases are automated with GitHub Actions.
 
 | Workflow | File | Trigger |
 |---|---|---|
@@ -81,11 +81,13 @@ The `prepublishOnly` script runs **`npm run build`** before publish so `dist/` i
 The package is **public** on npm; a normal install is enough:
 
 ```bash
-pnpm add @sisques-labs/shared-nestjs
-# or: npm install / yarn add @sisques-labs/shared-nestjs
+pnpm add @sisques-labs/nestjs-kit
+# or: npm install / yarn add @sisques-labs/nestjs-kit
 ```
 
 Use your organization’s registry or mirror policy if applicable.
+
+If you previously used **`@sisques-labs/shared-nestjs`**, uninstall it and depend on **`@sisques-labs/nestjs-kit`** instead; replace every import path from `'@sisques-labs/shared-nestjs'` to `'@sisques-labs/nestjs-kit'` (API unchanged).
 
 ---
 
@@ -143,7 +145,7 @@ Import **`SharedModule`** in your root or core module. It is **`@Global()`** and
 
 ```typescript
 import { Module } from '@nestjs/common';
-import { SharedModule } from '@sisques-labs/shared-nestjs';
+import { SharedModule } from '@sisques-labs/nestjs-kit';
 
 @Module({
   imports: [SharedModule],
@@ -163,7 +165,7 @@ import {
   SharedModule,
   MongoModule,
   TypeOrmModule,
-} from '@sisques-labs/shared-nestjs';
+} from '@sisques-labs/nestjs-kit';
 
 @Module({
   imports: [
@@ -192,7 +194,7 @@ import {
   DateValueObject,
   EmailValueObject,
   UuidValueObject,
-} from '@sisques-labs/shared-nestjs';
+} from '@sisques-labs/nestjs-kit';
 
 export class UserAggregate extends BaseAggregate {
   constructor(
@@ -256,7 +258,7 @@ import {
   EmailValueObject,
   UuidValueObject,
   PasswordValueObject,
-} from '@sisques-labs/shared-nestjs';
+} from '@sisques-labs/nestjs-kit';
 
 const email = new EmailValueObject('user@example.com');
 console.log(email.getDomain()); // 'example.com'
@@ -280,7 +282,7 @@ The library exports **`UuidValueObject`** for validated RFC 4122 UUID strings (c
 For **aggregate- or entity-specific** identifiers (nominal typing per bounded context), define thin subclasses or wrappers **in your application**, for example:
 
 ```typescript
-import { UuidValueObject } from '@sisques-labs/shared-nestjs';
+import { UuidValueObject } from '@sisques-labs/nestjs-kit';
 
 export class UserId extends UuidValueObject {
   // optional: narrow type or factory methods for your domain
@@ -294,7 +296,7 @@ export class UserId extends UuidValueObject {
 `BaseException` is the root exception class. Each value object has a corresponding typed exception thrown on validation failure.
 
 ```typescript
-import { BaseException } from '@sisques-labs/shared-nestjs';
+import { BaseException } from '@sisques-labs/nestjs-kit';
 
 // BaseException provides:
 // - timestamp: Date
@@ -317,7 +319,7 @@ import {
   Criteria,
   FilterOperator,
   SortDirection,
-} from '@sisques-labs/shared-nestjs';
+} from '@sisques-labs/nestjs-kit';
 
 const criteria = new Criteria(
   [{ field: 'email', operator: FilterOperator.EQUALS, value: 'user@example.com' }],
@@ -329,7 +331,7 @@ const criteria = new Criteria(
 `PaginatedResult<T>` wraps paginated query results:
 
 ```typescript
-import { PaginatedResult } from '@sisques-labs/shared-nestjs';
+import { PaginatedResult } from '@sisques-labs/nestjs-kit';
 
 // { data: T[], total: number, page: number, perPage: number }
 const result: PaginatedResult<User> = await repository.findByCriteria(criteria);
@@ -345,7 +347,7 @@ Implement these interfaces in your infrastructure layer to keep the domain free 
 import {
   IBaseReadRepository,
   IBaseWriteRepository,
-} from '@sisques-labs/shared-nestjs';
+} from '@sisques-labs/nestjs-kit';
 
 // Read side: findById, findByCriteria, save, delete
 interface IUserReadRepository extends IBaseReadRepository<UserAggregate> {}
@@ -361,7 +363,7 @@ interface IUserWriteRepository extends IBaseWriteRepository<UserAggregate> {}
 Factories handle deserialization of aggregates from different sources.
 
 ```typescript
-import { IReadFactory, IWriteFactory } from '@sisques-labs/shared-nestjs';
+import { IReadFactory, IWriteFactory } from '@sisques-labs/nestjs-kit';
 
 // Read factory: creates view models from aggregates, DTOs, or primitives
 class UserReadFactory implements IReadFactory<UserViewModel, UserAggregate, UserDto> {
@@ -384,7 +386,7 @@ class UserWriteFactory implements IWriteFactory<UserAggregate, CreateUserCommand
 `BaseViewModel` provides a base for read-side projections with typed accessors for `id`, `createdAt`, and `updatedAt`.
 
 ```typescript
-import { BaseViewModel } from '@sisques-labs/shared-nestjs';
+import { BaseViewModel } from '@sisques-labs/nestjs-kit';
 
 export class UserViewModel extends BaseViewModel {
   // Inherited: getId(), getCreatedAt(), getUpdatedAt()
@@ -398,7 +400,7 @@ export class UserViewModel extends BaseViewModel {
 `IBaseEventData` and `IEventMetadata` provide a structured shape for domain events with aggregate and entity metadata.
 
 ```typescript
-import { IBaseEventData, IEventMetadata } from '@sisques-labs/shared-nestjs';
+import { IBaseEventData, IEventMetadata } from '@sisques-labs/nestjs-kit';
 
 // IEventMetadata shape:
 // {
@@ -419,7 +421,7 @@ import { IBaseEventData, IEventMetadata } from '@sisques-labs/shared-nestjs';
 `BaseCommandHandler` integrates the `EventBus` to publish domain events automatically after command execution.
 
 ```typescript
-import { BaseCommandHandler } from '@sisques-labs/shared-nestjs';
+import { BaseCommandHandler } from '@sisques-labs/nestjs-kit';
 import { CommandHandler, EventBus } from '@nestjs/cqrs';
 
 @CommandHandler(CreateUserCommand)
@@ -448,7 +450,7 @@ export class CreateUserCommandHandler extends BaseCommandHandler<CreateUserComma
 `IBaseService` is a marker interface for application services.
 
 ```typescript
-import { IBaseService } from '@sisques-labs/shared-nestjs';
+import { IBaseService } from '@sisques-labs/nestjs-kit';
 
 @Injectable()
 export class UserService implements IBaseService {}
@@ -491,7 +493,7 @@ import {
   MongoMasterService,
   Criteria,
   PaginatedResult,
-} from '@sisques-labs/shared-nestjs';
+} from '@sisques-labs/nestjs-kit';
 
 @Injectable()
 export class UserMongoRepository extends BaseMongoMasterRepository<UserMongoDto> {
@@ -523,7 +525,7 @@ export class UserMongoRepository extends BaseMongoMasterRepository<UserMongoDto>
 #### Base DTO
 
 ```typescript
-import { BaseMongoDto } from '@sisques-labs/shared-nestjs';
+import { BaseMongoDto } from '@sisques-labs/nestjs-kit';
 
 // Type: { id: string; createdAt: Date; updatedAt: Date }
 type UserMongoDto = BaseMongoDto & {
@@ -556,7 +558,7 @@ Optional: `NODE_ENV` (affects query logging). For TypeORM CLI migrations that us
 #### Base Entity
 
 ```typescript
-import { BaseTypeormEntity } from '@sisques-labs/shared-nestjs';
+import { BaseTypeormEntity } from '@sisques-labs/nestjs-kit';
 import { Entity, Column } from 'typeorm';
 
 @Entity('users')
@@ -574,7 +576,7 @@ export class UserTypeormEntity extends BaseTypeormEntity {
 import {
   BaseTypeormMasterRepository,
   TypeormMasterService,
-} from '@sisques-labs/shared-nestjs';
+} from '@sisques-labs/nestjs-kit';
 
 @Injectable()
 export class UserTypeormRepository extends BaseTypeormMasterRepository {
@@ -593,7 +595,7 @@ export class UserTypeormRepository extends BaseTypeormMasterRepository {
 #### Base DTO
 
 ```typescript
-import { BaseTypeormDto } from '@sisques-labs/shared-nestjs';
+import { BaseTypeormDto } from '@sisques-labs/nestjs-kit';
 
 // Type: { id: string; createdAt: Date; updatedAt: Date }
 type UserTypeormDto = BaseTypeormDto & {
@@ -630,7 +632,7 @@ query {
 ```
 
 ```typescript
-import { BaseFindByCriteriaInput } from '@sisques-labs/shared-nestjs';
+import { BaseFindByCriteriaInput } from '@sisques-labs/nestjs-kit';
 
 @Resolver()
 export class UserResolver {
@@ -650,7 +652,7 @@ Individual input types: `BaseFilterInput`, `BaseSortInput`, `BasePaginationInput
 #### `BasePaginatedResultDto`
 
 ```typescript
-import { BasePaginatedResultDto } from '@sisques-labs/shared-nestjs';
+import { BasePaginatedResultDto } from '@sisques-labs/nestjs-kit';
 import { ObjectType, Field } from '@nestjs/graphql';
 
 @ObjectType()
@@ -664,7 +666,7 @@ export class UsersPaginatedResult extends BasePaginatedResultDto {
 #### `MutationResponseDto`
 
 ```typescript
-import { MutationResponseDto } from '@sisques-labs/shared-nestjs';
+import { MutationResponseDto } from '@sisques-labs/nestjs-kit';
 
 // Shape: { success: boolean; message?: string; id?: string }
 
@@ -675,7 +677,7 @@ createUser(@Args('input') input: CreateUserInput): Promise<MutationResponseDto> 
 #### `MutationResponseArrayDto`
 
 ```typescript
-import { MutationResponseArrayDto } from '@sisques-labs/shared-nestjs';
+import { MutationResponseArrayDto } from '@sisques-labs/nestjs-kit';
 
 // Shape: { success: boolean; message?: string; ids: string[] }
 
@@ -690,7 +692,7 @@ deleteUsers(@Args('ids', { type: () => [String] }) ids: string[]): Promise<Mutat
 `MutationResponseGraphQLMapper` is a NestJS injectable service provided by `SharedModule` that maps domain results to `MutationResponseDto`.
 
 ```typescript
-import { MutationResponseGraphQLMapper } from '@sisques-labs/shared-nestjs';
+import { MutationResponseGraphQLMapper } from '@sisques-labs/nestjs-kit';
 
 @Resolver()
 export class UserResolver {
@@ -727,7 +729,7 @@ Register the plugin (for example next to your GraphQL module):
 
 ```typescript
 import { Module } from '@nestjs/common';
-import { ComplexityPlugin } from '@sisques-labs/shared-nestjs';
+import { ComplexityPlugin } from '@sisques-labs/nestjs-kit';
 
 @Module({
   providers: [ComplexityPlugin],
@@ -746,7 +748,7 @@ import {
   LengthUnitEnum,
   UserRoleEnum,
   UserStatusEnum,
-} from '@sisques-labs/shared-nestjs';
+} from '@sisques-labs/nestjs-kit';
 
 FilterOperator.EQUALS     // 'eq'
 FilterOperator.NOT_EQUALS // 'ne'

@@ -9,7 +9,7 @@ Extends [`ValueObject<Date>`](../base/value-object.base.ts).
 ## Import
 
 ```typescript
-import { DateValueObject } from '@sisques-labs/shared-nestjs';
+import { DateValueObject } from '@sisques-labs/nestjs-kit';
 ```
 
 ---

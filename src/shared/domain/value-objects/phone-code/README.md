@@ -7,7 +7,7 @@ Represents an international **dialing prefix** such as `+34` or `+1`. Built on [
 ## Import
 
 ```typescript
-import { PhoneCodeValueObject, InvalidStringException } from '@sisques-labs/shared-nestjs';
+import { PhoneCodeValueObject, InvalidStringException } from '@sisques-labs/nestjs-kit';
 ```
 
 ---

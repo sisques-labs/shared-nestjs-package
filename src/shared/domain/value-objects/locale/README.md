@@ -13,7 +13,7 @@ import {
   LocaleValueObject,
   InvalidLocaleException,
   InvalidStringException,
-} from '@sisques-labs/shared-nestjs';
+} from '@sisques-labs/nestjs-kit';
 ```
 
 ---

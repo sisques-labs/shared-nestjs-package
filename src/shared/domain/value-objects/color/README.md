@@ -14,7 +14,7 @@ Extends [`ValueObject<string>`](../base/value-object.base.ts). Throws **`Invalid
 ## Import
 
 ```typescript
-import { ColorValueObject, InvalidColorException } from '@sisques-labs/shared-nestjs';
+import { ColorValueObject, InvalidColorException } from '@sisques-labs/nestjs-kit';
 ```
 
 ---
