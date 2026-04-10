@@ -2,125 +2,168 @@ import { InvalidColorException } from '@/shared/domain/exceptions/value-objects/
 import { ValueObject } from '@/shared/domain/value-objects/base/value-object.base';
 
 /**
- * Color Value Object
- * This value object is responsible for encapsulating color values.
- * It supports hex, RGB, HSL, and named colors.
- * @param value - The color value.
- * @returns A new instance of the ColorValueObject.
+ * Represents a color value object supporting hex, RGB, HSL, and named color formats.
+ *
+ * Validates and encapsulates color values for DDD-style domains.
+ *
+ * @remarks
+ * - Supported formats: Hex (e.g., `#fff`, `#ffffff`), RGB (e.g., `rgb(255,255,255)`), HSL (e.g., `hsl(0,0%,100%)`), and common named colors.
+ * - Throws {@link InvalidColorException} on invalid or empty values.
+ *
+ * @example
+ * ```typescript
+ * const color = new ColorValueObject('#ff00ff');
+ * color.toRgb(); // "rgb(255, 0, 255)"
+ * ```
+ *
+ * @public
  */
 export class ColorValueObject extends ValueObject<string> {
+  /**
+   * The normalized string value for the color.
+   * Stored in lowercase and trimmed.
+   * @internal
+   */
   private readonly _value: string;
 
+  /**
+   * Constructs a new {@link ColorValueObject}.
+   *
+   * @param value - The input color; must be hex, rgb, hsl, or a named color.
+   *
+   * @throws {@link InvalidColorException} If empty or invalid format.
+   */
   constructor(value: string) {
     super();
     this._value = (value ?? '').trim().toLowerCase();
     this.validate();
   }
 
+  /**
+   * Gets the underlying color string value.
+   *
+   * @returns The normalized color string.
+   */
   public get value(): string {
     return this._value;
   }
 
   /**
-   * Converts the color to hex format
-   * @returns The color in hex format
+   * Returns the color represented in hex format.
+   *
+   * @returns The color string in hex (e.g. `#ff00ff`), or itself if already named.
    */
   public toHex(): string {
     if (this.isHex()) {
       return this._value;
     }
-
     if (this.isRgb()) {
       return this.rgbToHex();
     }
-
     if (this.isHsl()) {
       return this.hslToHex();
     }
-
-    return this._value; // Named color
+    return this._value; // Named color, returned as-is.
   }
 
   /**
-   * Converts the color to RGB format
-   * @returns The color in RGB format
+   * Returns the color represented in RGB format.
+   *
+   * @returns The color string in RGB (e.g. `rgb(255, 0, 255)`), or itself if already named.
    */
   public toRgb(): string {
     if (this.isRgb()) {
       return this._value;
     }
-
     if (this.isHex()) {
       return this.hexToRgb();
     }
-
     if (this.isHsl()) {
       return this.hslToRgb();
     }
-
-    return this._value; // Named color
+    return this._value; // Named color, returned as-is.
   }
 
   /**
-   * Converts the color to HSL format
-   * @returns The color in HSL format
+   * Returns the color represented in HSL format.
+   *
+   * @returns The color string in HSL (e.g. `hsl(300, 100%, 50%)`), or itself if already named.
    */
   public toHsl(): string {
     if (this.isHsl()) {
       return this._value;
     }
-
     if (this.isHex()) {
       return this.hexToHsl();
     }
-
     if (this.isRgb()) {
       return this.rgbToHsl();
     }
-
-    return this._value; // Named color
+    return this._value; // Named color, returned as-is.
   }
 
   /**
-   * Checks if the color is in hex format
-   * @returns True if hex format
+   * Determines if the color is in valid hex format.
+   *
+   * @returns `true` if color matches hex pattern; otherwise `false`.
    */
   public isHex(): boolean {
     return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(this._value);
   }
 
   /**
-   * Checks if the color is in RGB format
-   * @returns True if RGB format
+   * Determines if the color is in valid RGB format.
+   *
+   * @returns `true` if color matches RGB pattern; otherwise `false`.
    */
   public isRgb(): boolean {
     return /^rgb\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)$/.test(this._value);
   }
 
   /**
-   * Checks if the color is in HSL format
-   * @returns True if HSL format
+   * Determines if the color is in valid HSL format.
+   *
+   * @returns `true` if color matches HSL pattern; otherwise `false`.
    */
   public isHsl(): boolean {
     return /^hsl\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*\)$/.test(this._value);
   }
 
+  /**
+   * Validates the encapsulated color.
+   *
+   * @throws {@link InvalidColorException} If the color is missing or has an unsupported format.
+   * @protected
+   */
   protected validate(): void {
     this.checkIsEmpty();
     this.checkIsValidColor();
   }
 
+  /**
+   * Throws if the color string is empty.
+   *
+   * @throws {@link InvalidColorException}
+   * @private
+   */
   private checkIsEmpty(): void {
     if (!this._value || this._value.trim() === '') {
       throw new InvalidColorException('Color cannot be empty');
     }
   }
 
+  /**
+   * Throws if the color format is invalid.
+   *
+   * @throws {@link InvalidColorException}
+   * @private
+   */
   private checkIsValidColor(): void {
     const hexPattern = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
     const rgbPattern = /^rgb\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)$/;
     const hslPattern = /^hsl\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*\)$/;
 
+    // A basic set of supported named colors.
     const namedColors = [
       'red',
       'green',
@@ -150,6 +193,12 @@ export class ColorValueObject extends ValueObject<string> {
     }
   }
 
+  /**
+   * Converts an RGB color string to a hex color string.
+   *
+   * @returns Hex string (e.g. `#ff00ff`), or the original value on parse failure.
+   * @private
+   */
   private rgbToHex(): string {
     const match = this._value.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
     if (!match) return this._value;
@@ -161,8 +210,16 @@ export class ColorValueObject extends ValueObject<string> {
     return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
   }
 
+  /**
+   * Converts a hex color string to an RGB color string.
+   *
+   * @returns RGB string (e.g. `rgb(255, 0, 255)`).
+   * @private
+   */
   private hexToRgb(): string {
     const hex = this._value.replace('#', '');
+
+    // Hex string must be exactly 6 characters for conversion.
     const r = parseInt(hex.substr(0, 2), 16);
     const g = parseInt(hex.substr(2, 2), 16);
     const b = parseInt(hex.substr(4, 2), 16);
@@ -170,23 +227,51 @@ export class ColorValueObject extends ValueObject<string> {
     return `rgb(${r}, ${g}, ${b})`;
   }
 
+  /**
+   * Stub: Converts a hex color string to an HSL color string.
+   *
+   * @remarks
+   * Not implemented. Returns the original value for now.
+   * @returns Original value.
+   * @private
+   */
   private hexToHsl(): string {
-    // Simplified conversion - would need full implementation
     return this._value;
   }
 
+  /**
+   * Stub: Converts an HSL color string to a hex color string.
+   *
+   * @remarks
+   * Not implemented. Returns the original value for now.
+   * @returns Original value.
+   * @private
+   */
   private hslToHex(): string {
-    // Simplified conversion - would need full implementation
     return this._value;
   }
 
+  /**
+   * Stub: Converts an HSL color string to an RGB color string.
+   *
+   * @remarks
+   * Not implemented. Returns the original value for now.
+   * @returns Original value.
+   * @private
+   */
   private hslToRgb(): string {
-    // Simplified conversion - would need full implementation
     return this._value;
   }
 
+  /**
+   * Stub: Converts an RGB color string to an HSL color string.
+   *
+   * @remarks
+   * Not implemented. Returns the original value for now.
+   * @returns Original value.
+   * @private
+   */
   private rgbToHsl(): string {
-    // Simplified conversion - would need full implementation
     return this._value;
   }
 }

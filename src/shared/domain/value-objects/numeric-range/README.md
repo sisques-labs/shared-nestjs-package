@@ -138,8 +138,8 @@ Replace the generic `Error` with your domain exception type where appropriate.
 
 For HTTP/GraphQL layers, the library also exposes DTOs (separate from this value object):
 
-- `NumericRangeInputDto` — input type with `min` / `max`
-- Response DTO under the numeric-range responses path
+- `NumericRangeInputDto` — GraphQL input with `min` / `max`
+- `NumericRangeResponseDto` — GraphQL object type for responses
 
 Wire them in resolvers or controllers, then map to `NumericRangeValueObject` in the application or domain layer so invalid ranges still fail inside the domain.
 
