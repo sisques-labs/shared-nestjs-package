@@ -28,7 +28,7 @@ There is **no** `SharedWinstonModule` in this library: you import **`WinstonModu
 | `@sisques-labs/shared-nestjs` | `createSharedWinstonLoggerOptions`, formats, merge helper |
 | `nest-winston` | `WinstonModule.forRoot` / `forRootAsync` in **your** app |
 | `winston` | Peer of both; runtime logger |
-| `winston-daily-rotate-file` | Daily file transport (loaded by the factory via `DailyRotateFile`) |
+| `winston-daily-rotate-file` | Daily file transport; the factory uses `import 'winston-daily-rotate-file'` and `new winston.transports.DailyRotateFile(...)` (same as a hand-written `winston.config.ts`) |
 
 `winston` and `winston-daily-rotate-file` are **optional peers** of this library (install them when you use logging).
 

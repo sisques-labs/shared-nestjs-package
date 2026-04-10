@@ -1,5 +1,6 @@
 import * as winston from 'winston';
-import DailyRotateFile from 'winston-daily-rotate-file';
+// Side effect: registers `DailyRotateFile` on `winston.transports` (same pattern as a local winston.config.ts).
+import 'winston-daily-rotate-file';
 
 import {
   createSharedConsoleLogFormat,
@@ -21,6 +22,20 @@ function asTransportArray(
     return [];
   }
   return Array.isArray(transportOrList) ? transportOrList : [transportOrList];
+}
+
+type DailyRotateFileTransport = new (options: object) => winston.transport;
+
+function getWinstonDailyRotateFile(): DailyRotateFileTransport {
+  const ctor = (
+    winston.transports as { DailyRotateFile?: DailyRotateFileTransport }
+  ).DailyRotateFile;
+  if (ctor == null) {
+    throw new Error(
+      'winston.transports.DailyRotateFile is missing. Install peer dependency winston-daily-rotate-file; it must load after winston (this package imports it as a side effect).',
+    );
+  }
+  return ctor;
 }
 
 /**
@@ -82,6 +97,7 @@ export function createSharedWinstonLoggerOptions(
 
   // Add daily-rotating JSON file unless explicitly disabled
   if (options.enableDailyRotateFile !== false) {
+    const DailyRotateFile = getWinstonDailyRotateFile();
     transports.push(
       new DailyRotateFile({
         filename: dailyRotateOptions.filename ?? 'logs/%DATE%.log',
