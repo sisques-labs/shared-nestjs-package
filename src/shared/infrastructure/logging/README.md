@@ -1,6 +1,8 @@
-# Logging (Winston + nest-winston)
+# Logging (Winston configuration)
 
-This package ships a **ready-to-use Winston setup** for NestJS applications: JSON logs to **daily-rotating files**, a **colored console** formatter aligned with Nest’s `context` / `trace` / `stack` fields, and a thin **`SharedWinstonModule`** wrapper around [`nest-winston`](https://github.com/gremo/nest-winston).
+This package exposes **Winston `LoggerOptions`** (formats, daily-rotate file, console) so your NestJS app can register logging with **`nest-winston`**’s `WinstonModule` yourself—same pattern as a local `winston.config.ts`, but centralized and reusable.
+
+There is **no** `SharedWinstonModule` in this library: you import **`WinstonModule`** from `nest-winston` in **your** `LoggingModule` (or `AppModule`) and pass the shared config.
 
 ---
 
@@ -8,23 +10,27 @@ This package ships a **ready-to-use Winston setup** for NestJS applications: JSO
 
 - [Requirements](#requirements)
 - [Install in your project](#install-in-your-project)
-- [Quick start](#quick-start)
-- [Use Nest’s `Logger`](#use-nests-logger)
-- [Async configuration with `ConfigService`](#async-configuration-with-configservice)
+- [Recommended pattern (`LoggingModule`)](#recommended-pattern-loggingmodule)
+- [Default config constant](#default-config-constant)
+- [Async configuration (`ConfigService`)](#async-configuration-configservice)
 - [Options reference](#options-reference)
 - [Extending the default setup](#extending-the-default-setup)
 - [Custom formats only](#custom-formats-only)
 - [Environment variables](#environment-variables)
+- [Exports](#exports)
 
 ---
 
 ## Requirements
 
-These packages are **optional peers** of `@sisques-labs/shared-nestjs`. When you use logging, install them in the **host application** (versions should satisfy the peer range declared in this library’s `package.json`):
+| Package | Role |
+|---------|------|
+| `@sisques-labs/shared-nestjs` | `createSharedWinstonLoggerOptions`, formats, merge helper |
+| `nest-winston` | `WinstonModule.forRoot` / `forRootAsync` in **your** app |
+| `winston` | Peer of both; runtime logger |
+| `winston-daily-rotate-file` | Daily file transport (loaded by the factory via `DailyRotateFile`) |
 
-- `nest-winston`
-- `winston`
-- `winston-daily-rotate-file`
+`winston` and `winston-daily-rotate-file` are **optional peers** of this library (install them when you use logging).
 
 ---
 
@@ -32,34 +38,42 @@ These packages are **optional peers** of `@sisques-labs/shared-nestjs`. When you
 
 ```bash
 pnpm add @sisques-labs/shared-nestjs nest-winston winston winston-daily-rotate-file
-# or: npm install / yarn add
 ```
-
-Ensure your app’s `AppModule` (or a dedicated `LoggingModule`) imports `SharedWinstonModule` **once**, typically near the top of `imports`, before other modules that rely on logging.
 
 ---
 
-## Quick start
+## Recommended pattern (`LoggingModule`)
 
-Wrap the shared module and re-export `WinstonModule` so the rest of the app can stay unchanged.
+**1. Config file** (optional; you can inline the call instead):
 
 ```typescript
+// winston.config.ts
+import { createSharedWinstonLoggerOptions } from '@sisques-labs/shared-nestjs';
+import type winston from 'winston';
+
+export const winstonConfig: winston.LoggerOptions =
+  createSharedWinstonLoggerOptions({
+    service: 'api',
+    level: process.env.LOG_LEVEL ?? 'info',
+  });
+```
+
+**2. Nest module** in your application:
+
+```typescript
+// logging.module.ts
 import { Module } from '@nestjs/common';
-import { SharedWinstonModule } from '@sisques-labs/shared-nestjs';
+import { WinstonModule } from 'nest-winston';
+import { winstonConfig } from './winston.config';
 
 @Module({
-  imports: [
-    SharedWinstonModule.forRoot({
-      service: 'api',
-      level: process.env.LOG_LEVEL ?? 'info',
-    }),
-  ],
-  exports: [SharedWinstonModule],
+  imports: [WinstonModule.forRoot(winstonConfig)],
+  exports: [WinstonModule],
 })
 export class LoggingModule {}
 ```
 
-Register it from `AppModule`:
+**3. Register once** (e.g. in `AppModule`):
 
 ```typescript
 @Module({
@@ -68,96 +82,76 @@ Register it from `AppModule`:
 export class AppModule {}
 ```
 
-**Default behaviour**
-
-- **Console**: timestamp, level colors, `[context]` in cyan, trace/stack styling similar to a typical Nest + Winston setup.
-- **File**: `winston-daily-rotate-file` writing under `logs/%DATE%.log` (pattern `YYYY-MM-DD`), gzip archives, `20m` max size, `14d` retention, **JSON** lines using the shared JSON pipeline.
-
-Create the `logs/` directory or point `dailyRotate.filename` to a path your process can write to.
+After that, use Nest’s `Logger` or inject Winston as documented in [nest-winston](https://github.com/gremo/nest-winston).
 
 ---
 
-## Use Nest’s `Logger`
+## Default config constant
 
-After `WinstonModule` is registered via `SharedWinstonModule`, inject Nest’s logger as usual:
-
-```typescript
-import { Injectable, Logger } from '@nestjs/common';
-
-@Injectable()
-export class UsersService {
-  private readonly logger = new Logger(UsersService.name);
-
-  findAll() {
-    this.logger.log('Listing users');
-    return [];
-  }
-}
-```
-
-To use Winston as the **application logger** (e.g. bootstrap logs), pass options into `NestFactory.create` (see [NestJS logger docs](https://docs.nestjs.com/techniques/logger)) using `WinstonModule.createLogger` from `nest-winston` together with `createSharedWinstonLoggerOptions` if you want the same config.
-
----
-
-## Async configuration with `ConfigService`
-
-Use `forRootAsync` when levels, paths, or service names come from configuration:
+If you do not need custom options at module load time:
 
 ```typescript
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { SharedWinstonModule } from '@sisques-labs/shared-nestjs';
+import { WinstonModule } from 'nest-winston';
+import { defaultSharedWinstonLoggerOptions } from '@sisques-labs/shared-nestjs';
 
 @Module({
-  imports: [
-    SharedWinstonModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        level: config.get<string>('LOG_LEVEL', 'info'),
-        service: config.get<string>('SERVICE_NAME', 'api'),
-        dailyRotate: {
-          filename: config.get<string>('LOG_FILE', 'logs/%DATE%.log'),
-          maxFiles: config.get<string>('LOG_MAX_FILES', '14d'),
-        },
-      }),
-    }),
-  ],
-  exports: [SharedWinstonModule],
+  imports: [WinstonModule.forRoot(defaultSharedWinstonLoggerOptions)],
+  exports: [WinstonModule],
 })
 export class LoggingModule {}
 ```
 
-The factory return type is **`SharedWinstonLoggerFactoryOptions`**; it is passed to `createSharedWinstonLoggerOptions` internally.
+`defaultSharedWinstonLoggerOptions` is equivalent to `createSharedWinstonLoggerOptions()` with no arguments. For values that depend on `ConfigService`, prefer `forRootAsync` below.
+
+---
+
+## Async configuration (`ConfigService`)
+
+```typescript
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { WinstonModule } from 'nest-winston';
+import { createSharedWinstonLoggerOptions } from '@sisques-labs/shared-nestjs';
+
+@Module({
+  imports: [
+    WinstonModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) =>
+        createSharedWinstonLoggerOptions({
+          level: config.get<string>('LOG_LEVEL', 'info'),
+          service: config.get<string>('SERVICE_NAME', 'api'),
+          dailyRotate: {
+            filename: config.get<string>('LOG_FILE', 'logs/%DATE%.log'),
+          },
+        }),
+    }),
+  ],
+  exports: [WinstonModule],
+})
+export class LoggingModule {}
+```
 
 ---
 
 ## Options reference
 
-`SharedWinstonLoggerFactoryOptions` (all optional except where noted):
+See **`SharedWinstonLoggerFactoryOptions`** in `shared-winston-logger-factory-options.interface.ts`. Common fields:
 
 | Field | Description |
 |--------|-------------|
-| `level` | Winston level. Default: `process.env.LOG_LEVEL` or `'info'`. |
-| `service` | Shorthand for `defaultMeta.service`. Default `'api'` when no `defaultMeta` is provided. |
-| `defaultMeta` | Extra fields merged into every log line. |
-| `enableConsole` | Set `false` to disable the console transport. Default `true`. |
-| `enableDailyRotateFile` | Set `false` to disable the rotating file transport. Default `true`. |
-| `dailyRotate` | Overrides for `filename`, `datePattern`, `zippedArchive`, `maxSize`, `maxFiles`, and `format`. |
-| `additionalTransports` | Extra `winston.transport` instances **after** the default console and file transports. |
-| `exceptionHandlers` / `rejectionHandlers` | Passed through to Winston (default empty arrays). |
-| `jsonLogFormat` | Replace the default JSON pipeline used for the file transport (and root `format`). |
-| `consoleFormat` | Replace the default console pipeline. |
-
-For the full TypeScript shape, see `shared-winston-logger-factory-options.interface.ts`.
+| `level` | Winston level (default: `LOG_LEVEL` env or `info`). |
+| `service` | Sets `defaultMeta.service` (default `api`). |
+| `defaultMeta` | Extra metadata on every log. |
+| `enableConsole` / `enableDailyRotateFile` | Toggle default transports. |
+| `dailyRotate` | `filename`, `datePattern`, `maxSize`, `maxFiles`, etc. |
+| `additionalTransports` | Appended after console + file. |
+| `jsonLogFormat` / `consoleFormat` | Replace default pipelines. |
 
 ---
 
 ## Extending the default setup
-
-### Merge extra transports
-
-Use **`mergeSharedWinstonLoggerOptions`** when you already have a base config from **`createSharedWinstonLoggerOptions`** and want to append transports or tweak fields. **Transports are concatenated**, not replaced.
 
 ```typescript
 import {
@@ -168,39 +162,22 @@ import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 
 const base = createSharedWinstonLoggerOptions({ service: 'billing' });
-
-export const winstonModuleOptions = mergeSharedWinstonLoggerOptions(base, {
-  transports: [
-    new winston.transports.Http({
-      host: 'log.example.com',
-      port: 80,
-      path: '/collect',
-    }),
-  ],
+export const winstonConfig = mergeSharedWinstonLoggerOptions(base, {
+  transports: [new winston.transports.Http({ host: 'logs.internal', path: '/ingest', port: 80 })],
 });
 
-// Then either:
 @Module({
-  imports: [WinstonModule.forRoot(winstonModuleOptions)],
+  imports: [WinstonModule.forRoot(winstonConfig)],
   exports: [WinstonModule],
 })
 export class LoggingModule {}
 ```
 
-### Extra transports via options only
-
-```typescript
-SharedWinstonModule.forRoot({
-  service: 'api',
-  additionalTransports: [new winston.transports.Stream({ stream: process.stderr })],
-});
-```
+`mergeSharedWinstonLoggerOptions` **concatenates** `transports`.
 
 ---
 
 ## Custom formats only
-
-If you only want the **format stacks** (e.g. you build `LoggerOptions` yourself):
 
 ```typescript
 import {
@@ -209,43 +186,40 @@ import {
 } from '@sisques-labs/shared-nestjs';
 import * as winston from 'winston';
 
-const logger = winston.createLogger({
+export const winstonConfig: winston.LoggerOptions = {
   transports: [
     new winston.transports.Console({
       format: createSharedConsoleLogFormat(),
     }),
   ],
-});
+};
 ```
 
 ---
 
 ## Environment variables
 
-| Variable | Used by |
-|----------|---------|
-| `LOG_LEVEL` | Default log level when `level` is omitted in options. |
-
-You can read any other variables in `forRootAsync` / `ConfigService` and map them to `SharedWinstonLoggerFactoryOptions`.
+| Variable | Used when |
+|----------|-----------|
+| `LOG_LEVEL` | Default level if `level` is omitted in `createSharedWinstonLoggerOptions`. |
 
 ---
 
-## Exported symbols
+## Exports
 
-| Export | Role |
+| Symbol | Role |
 |--------|------|
-| `SharedWinstonModule` | `forRoot` / `forRootAsync` around `WinstonModule`. |
-| `createSharedWinstonLoggerOptions` | Builds `winston.LoggerOptions`. |
-| `mergeSharedWinstonLoggerOptions` | Merges options; **concatenates** `transports`. |
-| `createSharedJsonLogFormat` | JSON file-oriented pipeline. |
+| `createSharedWinstonLoggerOptions` | Build `winston.LoggerOptions`. |
+| `defaultSharedWinstonLoggerOptions` | Same as above with defaults; for `WinstonModule.forRoot(...)`. |
+| `mergeSharedWinstonLoggerOptions` | Merge options; concatenate transports. |
+| `createSharedJsonLogFormat` | JSON pipeline for files / structured logs. |
 | `createSharedConsoleLogFormat` | Colored console pipeline. |
 | `SharedWinstonLoggerFactoryOptions` | Options type for the factory. |
-| `SharedWinstonModuleAsyncOptions` | Async module registration type. |
 
 ---
 
-## Related reading
+## Related
 
 - [nest-winston](https://github.com/gremo/nest-winston)
-- [Winston transports](https://github.com/winstonjs/winston/blob/master/docs/transports.md)
+- [Winston](https://github.com/winstonjs/winston)
 - [winston-daily-rotate-file](https://github.com/winstonjs/winston-daily-rotate-file)

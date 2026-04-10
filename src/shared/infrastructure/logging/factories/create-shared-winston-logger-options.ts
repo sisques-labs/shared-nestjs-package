@@ -168,3 +168,13 @@ export function mergeSharedWinstonLoggerOptions(
 
   return mergedLoggerOptions;
 }
+
+/**
+ * Default {@link winston.LoggerOptions} from {@link createSharedWinstonLoggerOptions} with no overrides.
+ * Pass to `WinstonModule.forRoot(...)` from `nest-winston` in the consuming application.
+ *
+ * Prefer calling {@link createSharedWinstonLoggerOptions} inside `WinstonModule.forRootAsync` when levels,
+ * paths, or service name must come from `ConfigService` or other async setup.
+ */
+export const defaultSharedWinstonLoggerOptions: winston.LoggerOptions =
+  createSharedWinstonLoggerOptions();

@@ -1,6 +1,6 @@
 # @sisques-labs/shared-nestjs
 
-Shared NestJS library providing **Domain-Driven Design (DDD)** and **CQRS** building blocks, **validated value objects**, **repository abstractions**, optional **MongoDB** and **TypeORM** helpers, **GraphQL** DTOs and plugins, and optional **Winston** logging (`nest-winston`) for microservices and modular monoliths.
+Shared NestJS library providing **Domain-Driven Design (DDD)** and **CQRS** building blocks, **validated value objects**, **repository abstractions**, optional **MongoDB** and **TypeORM** helpers, **GraphQL** DTOs and plugins, and optional **Winston logger configuration** (for use with `nest-winston` in consuming apps) for microservices and modular monoliths.
 
 ## Table of Contents
 
@@ -112,7 +112,7 @@ pnpm add graphql @nestjs/graphql @nestjs/apollo @apollo/server graphql-query-com
 # class-validator / class-transformer (typical for GraphQL inputs)
 pnpm add class-validator class-transformer
 
-# Winston logging (SharedWinstonModule, factories, formats)
+# Winston logging (shared config + nest-winston in your app)
 pnpm add nest-winston winston winston-daily-rotate-file
 ```
 
@@ -153,7 +153,7 @@ export class AppModule {}
 
 `SharedModule` wires **`MongoModule`** and **`TypeOrmModule`**. Configure database connections in **your** application (`MONGO_URI`, `MONGO_DB_NAME`, TypeORM `DataSource`, etc.); this library only provides helpers and services that read that configuration.
 
-**Logging is separate:** `SharedWinstonModule` is **not** part of `SharedModule`. Opt in by importing it (or `WinstonModule` with `createSharedWinstonLoggerOptions`) where you configure logging—see [Logging (Winston)](#logging-winston).
+**Logging is separate:** this library does **not** register `WinstonModule`. Import **`WinstonModule`** from `nest-winston` in your app and pass **`createSharedWinstonLoggerOptions()`** or **`defaultSharedWinstonLoggerOptions`**—see [Logging (Winston)](#logging-winston).
 
 ---
 
@@ -437,9 +437,9 @@ export class UserService implements IBaseService {}
 
 ### Logging (Winston)
 
-Optional **structured logging** via Winston, **daily log rotation**, and **`nest-winston`**. Install peers `nest-winston`, `winston`, and `winston-daily-rotate-file` in the consuming app.
+Optional **Winston `LoggerOptions`** (JSON file rotation + console formats) for use with **`WinstonModule.forRoot`** from **`nest-winston`** in the consuming app. Install `nest-winston`, `winston`, and `winston-daily-rotate-file` there; this package lists `winston` and `winston-daily-rotate-file` as optional peers.
 
-**Main exports:** `SharedWinstonModule` (`forRoot` / `forRootAsync`), `createSharedWinstonLoggerOptions`, `mergeSharedWinstonLoggerOptions`, `createSharedJsonLogFormat`, `createSharedConsoleLogFormat`, and related TypeScript option interfaces.
+**Main exports:** `createSharedWinstonLoggerOptions`, `defaultSharedWinstonLoggerOptions`, `mergeSharedWinstonLoggerOptions`, `createSharedJsonLogFormat`, `createSharedConsoleLogFormat`, and `SharedWinstonLoggerFactoryOptions`.
 
 **Full guide:** [src/shared/infrastructure/logging/README.md](src/shared/infrastructure/logging/README.md)
 

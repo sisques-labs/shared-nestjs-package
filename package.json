@@ -40,7 +40,6 @@
     "graphql": ">=16.0.0",
     "graphql-query-complexity": ">=0.12.0",
     "mongodb": ">=6.0.0",
-    "nest-winston": ">=1.9.0",
     "reflect-metadata": ">=0.2.0",
     "rxjs": ">=7.0.0",
     "typeorm": ">=0.3.0",
@@ -84,9 +83,6 @@
     "typeorm": {
       "optional": true
     },
-    "nest-winston": {
-      "optional": true
-    },
     "winston": {
       "optional": true
     },
@@ -123,7 +119,6 @@
     "husky": "^9.1.7",
     "jest": "^29.5.0",
     "mongodb": "^6.0.0",
-    "nest-winston": "^1.10.2",
     "prettier": "^3.0.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",

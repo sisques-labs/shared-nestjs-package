@@ -94,12 +94,10 @@ export * from './shared/domain/view-models/base-view-model/base-view-model';
 
 export * from './shared/infrastructure/database/base-database.repository';
 
-// Logging (Winston + nest-winston)
+// Logging (Winston config for nest-winston / winston.createLogger)
 export * from './shared/infrastructure/logging/formats/shared-winston.formats';
 export * from './shared/infrastructure/logging/factories/create-shared-winston-logger-options';
 export * from './shared/infrastructure/logging/interfaces/shared-winston-logger-factory-options.interface';
-export * from './shared/infrastructure/logging/interfaces/shared-winston-module-async-options.interface';
-export * from './shared/infrastructure/logging/shared-winston.module';
 
 // MongoDB
 export * from './shared/infrastructure/database/mongodb/base-mongo/base-mongo-database.repository';
