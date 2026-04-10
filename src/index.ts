@@ -20,8 +20,8 @@ export * from './shared/domain/entities/paginated-result.entity';
 
 // Enums
 export * from './shared/domain/enums/filter-operator.enum';
-export * from './shared/domain/enums/sort-direction.enum';
 export * from './shared/domain/enums/length-unit/length-unit.enum';
+export * from './shared/domain/enums/sort-direction.enum';
 export * from './shared/domain/enums/user-context/user/user-role/user-role.enum';
 export * from './shared/domain/enums/user-context/user/user-status/user-status.enum';
 
@@ -79,24 +79,13 @@ export * from './shared/domain/value-objects/locale/locale.vo';
 export * from './shared/domain/value-objects/number/number.vo';
 export * from './shared/domain/value-objects/numeric-range/numeric-range.vo';
 export * from './shared/domain/value-objects/password/password.vo';
-export * from './shared/domain/value-objects/phone/phone.vo';
 export * from './shared/domain/value-objects/phone-code/phone-code.vo';
+export * from './shared/domain/value-objects/phone/phone.vo';
 export * from './shared/domain/value-objects/slug/slug.vo';
 export * from './shared/domain/value-objects/string/string.vo';
 export * from './shared/domain/value-objects/timezone/timezone.vo';
 export * from './shared/domain/value-objects/url/url.vo';
 export * from './shared/domain/value-objects/uuid/uuid.vo';
-
-// Value Objects - Identifiers
-export * from './shared/domain/value-objects/identifiers/auth-uuid/auth-uuid.vo';
-export * from './shared/domain/value-objects/identifiers/growing-unit-uuid/growing-unit-uuid.vo';
-export * from './shared/domain/value-objects/identifiers/location-uuid/location-uuid.vo';
-export * from './shared/domain/value-objects/identifiers/overview-uuid/overview-uuid.vo';
-export * from './shared/domain/value-objects/identifiers/plant-uuid/plant-uuid.vo';
-export * from './shared/domain/value-objects/identifiers/saga-instance-uuid/saga-instance-uuid.vo';
-export * from './shared/domain/value-objects/identifiers/saga-log-uuid/saga-log-uuid.vo';
-export * from './shared/domain/value-objects/identifiers/saga-step-uuid/saga-step-uuid.vo';
-export * from './shared/domain/value-objects/identifiers/user-uuid/user-uuid.vo';
 
 // View Models
 export * from './shared/domain/view-models/base-view-model/base-view-model';
@@ -106,18 +95,18 @@ export * from './shared/domain/view-models/base-view-model/base-view-model';
 export * from './shared/infrastructure/database/base-database.repository';
 
 // MongoDB
-export * from './shared/infrastructure/database/mongodb/mongodb.module';
 export * from './shared/infrastructure/database/mongodb/base-mongo/base-mongo-database.repository';
 export * from './shared/infrastructure/database/mongodb/base-mongo/base-mongo-master/base-mongo-master.repository';
 export * from './shared/infrastructure/database/mongodb/dtos/base-mongo.dto';
+export * from './shared/infrastructure/database/mongodb/mongodb.module';
 export * from './shared/infrastructure/database/mongodb/services/mongo-master/mongo-master.service';
 
 // TypeORM
-export * from './shared/infrastructure/database/typeorm/typeorm.module';
 export * from './shared/infrastructure/database/typeorm/base-typeorm/base-typeorm-master/base-typeorm-master.repository';
 export * from './shared/infrastructure/database/typeorm/dtos/base-typeorm.dto';
 export * from './shared/infrastructure/database/typeorm/entities/base-typeorm.entity';
 export * from './shared/infrastructure/database/typeorm/services/typeorm-master/typeorm-master.service';
+export * from './shared/infrastructure/database/typeorm/typeorm.module';
 
 // ─── Transport ────────────────────────────────────────────────────────────────
 
