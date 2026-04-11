@@ -1,3 +1,6 @@
+import { Criteria } from '@/shared/domain/entities/criteria';
+import { PaginatedResult } from '../../entities/paginated-result.entity';
+
 /**
  * Base interface for write repositories.
  * Provides common methods that all write repositories should implement.
@@ -15,6 +18,13 @@ export interface IBaseWriteRepository<TEntity> {
    */
   findById(id: string): Promise<TEntity | null>;
 
+  /**
+   * Find an entity by its criteria.
+   *
+   * @param criteria - The criteria to find the entity.
+   * @returns Promise that resolves to the paginated result of the entities.
+   */
+  findByCriteria(criteria: Criteria): Promise<PaginatedResult<TEntity>>;
   /**
    * Save an entity (create or update).
    * This method should handle both create and update operations.
