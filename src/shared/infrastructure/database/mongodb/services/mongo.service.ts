@@ -21,6 +21,17 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
     const mongoUrl = this.configService.get<string>('MONGODB_URI');
     const dbName = this.configService.get<string>('MONGODB_DATABASE');
 
+    if (!mongoUrl) {
+      throw new Error(
+        'MONGODB_URI environment variable is not set. MongoModule requires MONGODB_URI to connect.',
+      );
+    }
+    if (!dbName) {
+      throw new Error(
+        'MONGODB_DATABASE environment variable is not set. MongoModule requires MONGODB_DATABASE to connect.',
+      );
+    }
+
     try {
       this.client = new MongoClient(mongoUrl, {
         authSource: 'admin',
