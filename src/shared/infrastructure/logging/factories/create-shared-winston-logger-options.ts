@@ -113,14 +113,22 @@ export function createSharedWinstonLoggerOptions(
   // Add any custom user-provided transports last
   transports.push(...(options.additionalTransports ?? []));
 
-  return {
+  const result: winston.LoggerOptions = {
     level,
     format: jsonFormat,
     defaultMeta,
     transports,
-    exceptionHandlers: options.exceptionHandlers ?? [],
-    rejectionHandlers: options.rejectionHandlers ?? [],
   };
+
+  // Only set handlers when non-empty — passing [] with exitOnError:true triggers a Winston warning
+  if (options.exceptionHandlers && options.exceptionHandlers.length > 0) {
+    result.exceptionHandlers = options.exceptionHandlers;
+  }
+  if (options.rejectionHandlers && options.rejectionHandlers.length > 0) {
+    result.rejectionHandlers = options.rejectionHandlers;
+  }
+
+  return result;
 }
 
 /**
