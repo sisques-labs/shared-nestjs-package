@@ -6,6 +6,8 @@ export * from './shared/application/commands/update/base-update/base-update.comm
 export * from './shared/application/dtos/commands/delete/delete-command.dto';
 export * from './shared/application/dtos/commands/field-changed/base-field-changed-command.dto';
 export * from './shared/application/dtos/commands/update/update-command.dto';
+export * from './shared/application/dtos/queries/find-by-criteria/find-by-criteria-query.dto';
+export * from './shared/application/dtos/queries/find-by-id/find-by-id-query.dto';
 export * from './shared/application/services/base-service/base-service.interface';
 
 // ─── Domain ──────────────────────────────────────────────────────────────────
