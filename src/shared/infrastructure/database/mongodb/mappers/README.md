@@ -1,5 +1,7 @@
 # MongoDB mappers
 
+**MongoDB kit overview:** [../README.md](../README.md)
+
 This folder contains **infrastructure mappers** between **MongoDB persistence shapes** (plain DTOs aligned with stored documents) and **domain-facing types** (typically view models and, when needed, aggregates).
 
 The kit ships **`BaseMongoDBMapper`**, an abstract Nest injectable that forces a consistent mapping API in consuming applications.
@@ -91,7 +93,7 @@ If a bounded context only needs **view models** and **documents** (no separate a
 ## Relationship to repositories
 
 - **Repositories** load and persist documents; they usually depend on a **mapper** to convert `TMongoDto` ↔ domain types.
-- Keep **query/filter construction** in **`BaseMongoMasterRepository`** (or your own base); keep **field-by-field mapping** in **`BaseMongoDBMapper`** subclasses.
+- Keep **query/filter construction** in **`BaseMongoDatabaseRepository`** subclasses (or your own base); keep **field-by-field mapping** in **`BaseMongoDBMapper`** subclasses.
 
 ---
 

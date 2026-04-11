@@ -1,8 +1,8 @@
 import { Global, Module } from '@nestjs/common';
 
-import { MongoMasterService } from '@/shared/infrastructure/database/mongodb/services/mongo-master/mongo-master.service';
+import { MongoService } from '@/shared/infrastructure/database/mongodb/services/mongo.service';
 
-const SERVICES = [MongoMasterService];
+const SERVICES = [MongoService];
 
 /**
  * Opt-in MongoDB integration. Import only in apps that use MongoDB.

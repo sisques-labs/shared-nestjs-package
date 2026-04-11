@@ -8,15 +8,15 @@ import { ConfigService } from '@nestjs/config';
 import { Db, MongoClient } from 'mongodb';
 
 @Injectable()
-export class MongoMasterService implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(MongoMasterService.name);
+export class MongoService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(MongoService.name);
   private client: MongoClient;
   private db: Db;
 
   constructor(private readonly configService: ConfigService) {}
 
   async onModuleInit() {
-    this.logger.log(`🚀 Initializing MongoDB Master`);
+    this.logger.log(`Initializing MongoDB`);
 
     const mongoUrl = this.configService.get<string>('MONGODB_URI');
     const dbName = this.configService.get<string>('MONGODB_DATABASE');
@@ -28,25 +28,25 @@ export class MongoMasterService implements OnModuleInit, OnModuleDestroy {
 
       await this.client.connect();
       this.db = this.client.db(dbName);
-      this.logger.log(`🚀 MongoDB Master connected successfully`);
+      this.logger.log(`MongoDB connected successfully`);
     } catch (error) {
-      this.logger.error(`🚀 Error connecting to MongoDB Master: ${error}`);
+      this.logger.error(`Error connecting to MongoDB: ${error}`);
       throw error;
     }
   }
 
   async onModuleDestroy() {
     await this.client.close();
-    this.logger.log(`🚀 MongoDB Master disconnected`);
+    this.logger.log(`MongoDB connection closed`);
   }
 
   getDatabase(): Db {
-    this.logger.log(`🚀 Getting MongoDB Master database`);
+    this.logger.log(`Getting MongoDB database`);
     return this.db;
   }
 
   getCollection(collectionName: string) {
-    this.logger.log(`🚀 Getting MongoDB Master collection ${collectionName}`);
+    this.logger.log(`Getting MongoDB collection ${collectionName}`);
     return this.db.collection(collectionName);
   }
 }

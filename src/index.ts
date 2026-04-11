@@ -102,11 +102,10 @@ export * from './shared/infrastructure/logging/interfaces/shared-winston-logger-
 
 // MongoDB
 export * from './shared/infrastructure/database/mongodb/base-mongo/base-mongo-database.repository';
-export * from './shared/infrastructure/database/mongodb/base-mongo/base-mongo-master/base-mongo-master.repository';
 export * from './shared/infrastructure/database/mongodb/dtos/base-mongo.dto';
 export * from './shared/infrastructure/database/mongodb/mappers/base-mongodb.mapper';
 export * from './shared/infrastructure/database/mongodb/mongodb.module';
-export * from './shared/infrastructure/database/mongodb/services/mongo-master/mongo-master.service';
+export * from './shared/infrastructure/database/mongodb/services/mongo.service';
 
 // TypeORM
 export * from './shared/infrastructure/database/typeorm/base-typeorm/base-typeorm-master/base-typeorm-master.repository';

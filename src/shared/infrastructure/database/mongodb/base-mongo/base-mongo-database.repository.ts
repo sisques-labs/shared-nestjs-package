@@ -1,19 +1,26 @@
-import { Logger } from '@nestjs/common';
-import { Collection } from 'mongodb';
-
 import { Criteria } from '@/shared/domain/entities/criteria';
 import { FilterOperator } from '@/shared/domain/enums/filter-operator.enum';
 import { SortDirection } from '@/shared/domain/enums/sort-direction.enum';
 import { BaseDatabaseRepository } from '@/shared/infrastructure/database/base-database.repository';
+import { MongoService } from '@/shared/infrastructure/database/mongodb/services/mongo.service';
+import { Logger } from '@nestjs/common';
+import { Collection } from 'mongodb';
 
 /**
- * Base class for MongoDB database repositories.
- * Provides common methods for building queries, sorting, and pagination.
+ * Base class for MongoDB repositories backed by {@link MongoService}.
+ * Provides {@link getCollection}, query/sort builders, and paginated execution.
  */
 export abstract class BaseMongoDatabaseRepository extends BaseDatabaseRepository {
-  constructor() {
+  constructor(protected readonly mongoService: MongoService) {
     super();
     this.logger = new Logger(this.constructor.name);
+  }
+
+  /**
+   * Returns a collection from the app database (same as {@link MongoService.getCollection}).
+   */
+  protected getCollection(collectionName: string): Collection {
+    return this.mongoService.getCollection(collectionName);
   }
 
   /**

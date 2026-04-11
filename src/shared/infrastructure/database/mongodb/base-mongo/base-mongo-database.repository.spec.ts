@@ -3,12 +3,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Criteria } from '@/shared/domain/entities/criteria';
 import { FilterOperator } from '@/shared/domain/enums/filter-operator.enum';
 import { SortDirection } from '@/shared/domain/enums/sort-direction.enum';
-import { BaseMongoMasterRepository } from '@/shared/infrastructure/database/mongodb/base-mongo/base-mongo-master/base-mongo-master.repository';
-import { MongoMasterService } from '@/shared/infrastructure/database/mongodb/services/mongo-master/mongo-master.service';
+import { BaseMongoDatabaseRepository } from '@/shared/infrastructure/database/mongodb/base-mongo/base-mongo-database.repository';
+import { MongoService } from '@/shared/infrastructure/database/mongodb/services/mongo.service';
 
-describe('BaseMongoMasterRepository', () => {
-  let repository: BaseMongoMasterRepository;
-  let mongoMasterService: MongoMasterService;
+class StubMongoRepository extends BaseMongoDatabaseRepository {}
+
+describe('BaseMongoDatabaseRepository', () => {
+  let repository: StubMongoRepository;
+  let mongoService: MongoService;
   let module: TestingModule;
   let mockCollection: any;
 
@@ -52,23 +54,19 @@ describe('BaseMongoMasterRepository', () => {
     module = await Test.createTestingModule({
       providers: [
         {
-          provide: MongoMasterService,
+          provide: MongoService,
           useValue: mockMongoService,
         },
         {
-          provide: BaseMongoMasterRepository,
-          useFactory: (mongo: MongoMasterService) => {
-            return new BaseMongoMasterRepository(mongo);
-          },
-          inject: [MongoMasterService],
+          provide: StubMongoRepository,
+          useFactory: (mongo: MongoService) => new StubMongoRepository(mongo),
+          inject: [MongoService],
         },
       ],
     }).compile();
 
-    mongoMasterService = module.get<MongoMasterService>(MongoMasterService);
-    repository = module.get<BaseMongoMasterRepository>(
-      BaseMongoMasterRepository,
-    );
+    mongoService = module.get<MongoService>(MongoService);
+    repository = module.get<StubMongoRepository>(StubMongoRepository);
   });
 
   afterEach(async () => {
@@ -79,8 +77,14 @@ describe('BaseMongoMasterRepository', () => {
     expect(repository).toBeDefined();
   });
 
-  it('should have mongoMasterService injected', () => {
-    expect(repository['mongoMasterService']).toBe(mongoMasterService);
+  it('should have mongoService injected', () => {
+    expect(repository['mongoService']).toBe(mongoService);
+  });
+
+  it('should delegate getCollection to MongoService', () => {
+    const col = repository['getCollection']('items');
+    expect(mongoService.getCollection).toHaveBeenCalledWith('items');
+    expect(col).toBe(mockCollection);
   });
 
   it('should have logger initialized', () => {
@@ -137,8 +141,6 @@ describe('BaseMongoMasterRepository', () => {
 
       const query = repository['buildMongoQuery'](criteria);
 
-      // Note: The actual implementation has a bug where GREATER_THAN uses regex
-      // This test reflects the actual behavior
       expect(query.age).toBeDefined();
     });
 
@@ -255,7 +257,6 @@ describe('BaseMongoMasterRepository', () => {
     });
 
     it('should handle empty results', async () => {
-      // Reset mocks for this test
       mockCollection.toArray.mockResolvedValueOnce([]);
       mockCollection.countDocuments.mockResolvedValueOnce(0);
 

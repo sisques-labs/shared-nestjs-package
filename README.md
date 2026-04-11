@@ -147,7 +147,7 @@ The library is **opt-in by feature**. Import **`MongoModule`**, **`TypeOrmModule
 
 **Optional database modules:**
 
-- **`MongoModule`** — provides `MongoMasterService` (`MONGODB_URI`, `MONGODB_DATABASE` via `ConfigService`).
+- **`MongoModule`** — provides `MongoService` (`MONGODB_URI`, `MONGODB_DATABASE` via `ConfigService`).
 - **`TypeOrmModule`** — registers `TypeOrmModule.forRootAsync` using `DATABASE_*` config; requires **`ConfigModule`** in the app (for example `ConfigModule.forRoot({ isGlobal: true })`).
 
 ```typescript
@@ -463,7 +463,7 @@ Import **`MongoModule`** from this package when you use MongoDB repositories. It
 
 #### Environment Variables
 
-The shared `MongoMasterService` reads:
+The shared `MongoService` reads:
 
 ```env
 MONGODB_URI=mongodb://localhost:27017
@@ -472,23 +472,23 @@ MONGODB_DATABASE=my_database
 
 #### Base Repository
 
-Extend **`BaseMongoMasterRepository`** (do not only `implements IBaseReadRepository`) so **`this`** includes protected helpers: **`getCollection`**, **`buildMongoQuery`**, **`buildSortQuery`**, **`executeQueryWithPagination`**, and **`calculatePagination`** from **`BaseDatabaseRepository`**.
+Extend **`BaseMongoDatabaseRepository`** (do not only `implements IBaseReadRepository`) so **`this`** includes **`MongoService`**, **`getCollection`**, **`buildMongoQuery`**, **`buildSortQuery`**, **`executeQueryWithPagination`**, and **`calculatePagination`** from **`BaseDatabaseRepository`**.
 
 Published **`dist/**/*.d.ts`** use **relative** imports (rewritten at build with **`tsc-alias`**), so consumers do not need the kit’s `@/` path aliases to resolve inherited types.
 
 ```typescript
 import {
-  BaseMongoMasterRepository,
-  MongoMasterService,
+  BaseMongoDatabaseRepository,
+  MongoService,
   Criteria,
   PaginatedResult,
 } from '@sisques-labs/nestjs-kit';
 
 @Injectable()
-export class UserMongoReadRepository extends BaseMongoMasterRepository {
+export class UserMongoReadRepository extends BaseMongoDatabaseRepository {
   private static readonly COLLECTION = 'users';
 
-  constructor(mongoService: MongoMasterService) {
+  constructor(mongoService: MongoService) {
     super(mongoService);
   }
 

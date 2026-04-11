@@ -2,12 +2,12 @@ import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Db, MongoClient } from 'mongodb';
 
-import { MongoMasterService } from './mongo-master.service';
+import { MongoService } from './mongo.service';
 
 jest.mock('mongodb');
 
-describe('MongoMasterService', () => {
-  let service: MongoMasterService;
+describe('MongoService', () => {
+  let service: MongoService;
   let module: TestingModule;
   let mockClient: jest.Mocked<MongoClient>;
   let mockDb: jest.Mocked<Db>;
@@ -40,7 +40,6 @@ describe('MongoMasterService', () => {
   });
 
   afterEach(async () => {
-    // Initialize client if not already done to avoid errors in onModuleDestroy
     if (module && service && !service['client']) {
       service['client'] = mockClient;
     }
@@ -56,7 +55,7 @@ describe('MongoMasterService', () => {
   beforeEach(async () => {
     module = await Test.createTestingModule({
       providers: [
-        MongoMasterService,
+        MongoService,
         {
           provide: ConfigService,
           useValue: mockConfigService,
@@ -64,7 +63,7 @@ describe('MongoMasterService', () => {
       ],
     }).compile();
 
-    service = module.get<MongoMasterService>(MongoMasterService);
+    service = module.get<MongoService>(MongoService);
   });
 
   it('should be defined', () => {
@@ -90,7 +89,7 @@ describe('MongoMasterService', () => {
       await expect(service.onModuleInit()).rejects.toThrow(error);
 
       expect(errorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Error connecting to MongoDB Master:'),
+        expect.stringContaining('Error connecting to MongoDB:'),
       );
       errorSpy.mockRestore();
     });
