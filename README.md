@@ -472,7 +472,9 @@ MONGODB_DATABASE=my_database
 
 #### Base Repository
 
-Extend `BaseMongoMasterRepository` to get filter, sort, and pagination support out of the box.
+Extend **`BaseMongoMasterRepository`** (do not only `implements IBaseReadRepository`) so **`this`** includes protected helpers: **`getCollection`**, **`buildMongoQuery`**, **`buildSortQuery`**, **`executeQueryWithPagination`**, and **`calculatePagination`** from **`BaseDatabaseRepository`**.
+
+Published **`dist/**/*.d.ts`** use **relative** imports (rewritten at build with **`tsc-alias`**), so consumers do not need the kit’s `@/` path aliases to resolve inherited types.
 
 ```typescript
 import {
@@ -483,15 +485,33 @@ import {
 } from '@sisques-labs/nestjs-kit';
 
 @Injectable()
-export class UserMongoRepository extends BaseMongoMasterRepository<UserMongoDto> {
+export class UserMongoReadRepository extends BaseMongoMasterRepository {
+  private static readonly COLLECTION = 'users';
+
   constructor(mongoService: MongoMasterService) {
-    super(mongoService, 'users'); // collection name
+    super(mongoService);
   }
 
-  async findByCriteria(criteria: Criteria): Promise<PaginatedResult<UserAggregate>> {
-    return this.executeQueryWithPagination(criteria);
-    // Automatically maps FilterOperator → MongoDB $operators
-    // Applies sorts and pagination (skip/limit)
+  async findByCriteria(
+    criteria: Criteria,
+  ): Promise<PaginatedResult<UserViewModel>> {
+    const collection = this.getCollection(UserMongoReadRepository.COLLECTION);
+    const mongoQuery = this.buildMongoQuery(criteria);
+    const sortQuery = this.buildSortQuery(criteria);
+    const { skip, limit } = await this.calculatePagination(criteria);
+    const [rows, total] = await this.executeQueryWithPagination(
+      collection,
+      mongoQuery,
+      sortQuery,
+      skip,
+      limit,
+    );
+    return new PaginatedResult<UserViewModel>(
+      rows.map((doc) => /* yourMongoMapper.toViewModel(doc) */ doc as UserViewModel),
+      total,
+      criteria.pagination.page,
+      criteria.pagination.perPage,
+    );
   }
 }
 ```
