@@ -3,7 +3,9 @@
 export * from './shared/application/commands/base/base-command.handler';
 export * from './shared/application/commands/interfaces/base-command-handler.interface';
 export * from './shared/application/commands/update/base-update/base-update.command-handler';
+export * from './shared/application/dtos/commands/delete/delete-command.dto';
 export * from './shared/application/dtos/commands/field-changed/base-field-changed-command.dto';
+export * from './shared/application/dtos/commands/update/update-command.dto';
 export * from './shared/application/services/base-service/base-service.interface';
 
 // ─── Domain ──────────────────────────────────────────────────────────────────
