@@ -134,6 +134,7 @@ export * from './shared/transport/graphql/dtos/responses/success-response/succes
 export * from './shared/transport/graphql/dtos/success-response-array.dto';
 
 // GraphQL - Mappers
+export * from './shared/transport/graphql/mappers/base-graphql.mapper';
 export * from './shared/transport/graphql/mappers/mutation-response/mutation-response.mapper';
 
 // GraphQL - Plugins
