@@ -1,5 +1,5 @@
 import { Criteria } from '@/shared/domain/entities/criteria';
-import { PaginatedResult } from '../../entities/paginated-result.entity';
+import { PaginatedResult } from '@/shared/domain/entities/paginated-result.entity';
 
 /**
  * Base interface for write repositories.
