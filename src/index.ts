@@ -115,6 +115,9 @@ export * from './shared/infrastructure/database/typeorm/services/typeorm-master/
 export * from './shared/infrastructure/database/typeorm/typeorm-module-options.factory';
 export * from './shared/infrastructure/database/typeorm/typeorm.module';
 
+// Kafka
+export * from './shared/infrastructure/kafka/interfaces/kafka-event-publisher.interface';
+
 // ─── Transport ────────────────────────────────────────────────────────────────
 
 // GraphQL - Enum registration (opt-in; call before schema generation)
