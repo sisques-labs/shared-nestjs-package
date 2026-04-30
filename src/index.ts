@@ -118,6 +118,11 @@ export * from './shared/infrastructure/database/typeorm/typeorm.module';
 // Kafka
 export * from './shared/infrastructure/kafka/interfaces/kafka-event-publisher.interface';
 
+// Schema Registry
+export * from './shared/infrastructure/kafka/schema-registry/schema-registry.module';
+export * from './shared/infrastructure/kafka/schema-registry/schema-registry.service';
+export * from './shared/infrastructure/kafka/schema-registry/schema-registry-options.interface';
+
 // ─── Transport ────────────────────────────────────────────────────────────────
 
 // GraphQL - Enum registration (opt-in; call before schema generation)
