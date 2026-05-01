@@ -1,4 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
+import { Type } from 'class-transformer';
 import { IsArray, IsOptional, ValidateNested } from 'class-validator';
 
 import { BaseFilterInput } from '@/shared/transport/graphql/dtos/requests/base-filter/base-filter.input';
@@ -15,6 +16,7 @@ export class BaseFindByCriteriaInput {
   @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
+  @Type(() => BaseFilterInput)
   filters?: BaseFilterInput[];
 
   @Field(() => [BaseSortInput], {
@@ -25,6 +27,7 @@ export class BaseFindByCriteriaInput {
   @IsArray()
   @IsOptional()
   @ValidateNested({ each: true })
+  @Type(() => BaseSortInput)
   sorts?: BaseSortInput[];
 
   @Field(() => BasePaginationInput, {
@@ -34,5 +37,6 @@ export class BaseFindByCriteriaInput {
   })
   @IsOptional()
   @ValidateNested()
+  @Type(() => BasePaginationInput)
   pagination?: BasePaginationInput;
 }
