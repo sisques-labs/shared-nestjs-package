@@ -40,43 +40,27 @@
   },
   "peerDependencies": {
     "@apollo/server": ">=4.0.0",
-    "@kafkajs/confluent-schema-registry": ">=3.0.0",
-    "@nestjs/axios": ">=3.0.0",
     "@nestjs/apollo": ">=12.0.0",
     "@nestjs/common": ">=10.0.0",
     "@nestjs/config": ">=3.0.0",
     "@nestjs/core": ">=10.0.0",
-    "@nestjs/cqrs": ">=10.0.0",
     "@nestjs/graphql": ">=12.0.0",
     "@nestjs/typeorm": ">=10.0.0",
-    "class-transformer": ">=0.5.0",
-    "class-validator": ">=0.14.0",
     "graphql": ">=16.0.0",
     "graphql-query-complexity": ">=0.12.0",
     "mongodb": ">=6.0.0",
     "reflect-metadata": ">=0.2.0",
     "rxjs": ">=7.0.0",
-    "typeorm": ">=0.3.0",
-    "winston": ">=3.0.0",
-    "winston-daily-rotate-file": ">=5.0.0"
+    "typeorm": ">=0.3.0"
   },
   "peerDependenciesMeta": {
     "@apollo/server": {
-      "optional": true
-    },
-    "@kafkajs/confluent-schema-registry": {
-      "optional": true
-    },
-    "@nestjs/axios": {
       "optional": true
     },
     "@nestjs/apollo": {
       "optional": true
     },
     "@nestjs/config": {
-      "optional": true
-    },
-    "@nestjs/cqrs": {
       "optional": true
     },
     "@nestjs/graphql": {
@@ -88,12 +72,6 @@
     "graphql": {
       "optional": true
     },
-    "class-transformer": {
-      "optional": true
-    },
-    "class-validator": {
-      "optional": true
-    },
     "graphql-query-complexity": {
       "optional": true
     },
@@ -102,16 +80,17 @@
     },
     "typeorm": {
       "optional": true
-    },
-    "winston": {
-      "optional": true
-    },
-    "winston-daily-rotate-file": {
-      "optional": true
     }
   },
   "dependencies": {
-    "dotenv": "^16.0.0"
+    "dotenv": "^16.0.0",
+    "@kafkajs/confluent-schema-registry": "^3.9.0",
+    "@nestjs/axios": "^3.1.3",
+    "@nestjs/cqrs": "^10.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
+    "winston": "^3.19.0",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
     "@apollo/server": "^4.0.0",
