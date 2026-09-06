@@ -1,3 +1,10 @@
+# [1.10.0-alpha.1](https://github.com/sisques-labs/nestjs-kit/compare/v1.9.0...v1.10.0-alpha.1) (2026-09-06)
+
+
+### Features
+
+* **auth-client:** add Sisques Account JWT verification module ([02ed7e2](https://github.com/sisques-labs/nestjs-kit/commit/02ed7e213cb67edbd502c141a80045fe9fbda24a))
+
 # [1.9.0](https://github.com/sisques-labs/nestjs-kit/compare/v1.8.0...v1.9.0) (2026-09-06)
 
 
