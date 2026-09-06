@@ -118,7 +118,7 @@ importers:
         specifier: 30.4.2
         version: 30.4.2(@types/node@20.19.43)(supports-color@8.1.1)(ts-node@10.9.2(@types/node@20.19.43)(typescript@6.0.3))
       kafkajs:
-        specifier: ^2.2.4
+        specifier: 2.2.4
         version: 2.2.4
       mongodb:
         specifier: ^7.0.0
