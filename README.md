@@ -35,6 +35,7 @@
   - [Response DTOs](#response-dtos)
   - [Mappers](#mappers)
   - [Complexity Plugin](#complexity-plugin)
+- [Auth Client (Sisques Account JWT)](#auth-client-sisques-account-jwt)
 - [RBAC (Tenant Permissions)](#rbac-tenant-permissions)
 - [Enums](#enums)
 
@@ -113,6 +114,9 @@ pnpm add kafkajs @nestjs/config @nestjs/cqrs
 # KurrentDB domain-event forwarding (EventBus -> EventStoreDB) — only if you import '@sisques-labs/nestjs-kit/event-store'
 pnpm add @kurrent/kurrentdb-client @nestjs/config @nestjs/cqrs
 
+# Sisques Account JWT verification — only if you import '@sisques-labs/nestjs-kit/auth-client'
+pnpm add @nestjs/jwt
+
 # class-validator / class-transformer (typical for GraphQL inputs)
 pnpm add class-validator class-transformer
 
@@ -134,6 +138,7 @@ The package has dedicated entry points so importing the root never requires an o
 | `@sisques-labs/nestjs-kit/messaging` | `kafkajs`, `@nestjs/config`, `@nestjs/cqrs` |
 | `@sisques-labs/nestjs-kit/event-store` | `@kurrent/kurrentdb-client`, `@nestjs/config`, `@nestjs/cqrs` |
 | `@sisques-labs/nestjs-kit/rbac` | `@nestjs/graphql` (only if you guard GraphQL resolvers), `express` |
+| `@sisques-labs/nestjs-kit/auth-client` | `@nestjs/jwt`, `@nestjs/graphql` (only if you guard GraphQL resolvers), `express` |
 | `@sisques-labs/nestjs-kit/registered-enums` | Nothing extra — narrow export of the GraphQL enum registration for use before schema generation |
 
 > **Migrating from an earlier version?** MongoDB, TypeORM, GraphQL, and Kafka symbols used to be exported from the package root. Move those specific imports to the matching subpath above; everything else (value objects, base classes, domain enums, exceptions) still imports from `@sisques-labs/nestjs-kit` unchanged.
@@ -972,6 +977,69 @@ export class GraphqlPluginsModule {}
 
 ---
 
+## Auth Client (Sisques Account JWT)
+
+`@sisques-labs/nestjs-kit/auth-client` verifies the access token issued by
+**Sisques Account** — the platform's shared identity/tenancy service
+(`account-api`) — and populates `request.user` with its claims (`sub`,
+`email`, `platformAdmin`, `tenants: Array<{ tenantId, role }>`). Consuming
+apps never talk to the identity provider (Keycloak, etc.) directly, only to
+Sisques Account; this module trusts whatever token it already signed, using
+the same secret. Pair it with [RBAC](#rbac-tenant-permissions) for
+tenant-scoped authorization on top of the same `tenants` claim.
+
+Register it once, globally, typically from your app's core/shared module:
+
+```typescript
+import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtModuleOptions } from '@nestjs/jwt';
+import { AuthClientModule } from '@sisques-labs/nestjs-kit/auth-client';
+
+@Module({
+  imports: [
+    AuthClientModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): JwtModuleOptions => ({
+        secret: config.getOrThrow<string>('auth.jwtSecret'),
+      }),
+    }),
+  ],
+})
+export class CoreModule {}
+```
+
+Then use `JwtAuthGuard` and `@CurrentUser()` in any REST controller or
+GraphQL resolver:
+
+```typescript
+import {
+  CurrentUser,
+  CurrentUserPayload,
+  JwtAuthGuard,
+} from '@sisques-labs/nestjs-kit/auth-client';
+
+@UseGuards(JwtAuthGuard)
+@Get('me')
+whoAmI(@CurrentUser() user: CurrentUserPayload) {
+  return user;
+}
+```
+
+`PlatformAdminGuard` is also exported, for endpoints that require
+`platformAdmin: true` on the token — must run after `JwtAuthGuard`:
+
+```typescript
+@UseGuards(JwtAuthGuard, PlatformAdminGuard)
+@Delete(':id')
+async deleteAnything(@Param('id') id: string) { /* ... */ }
+```
+
+**Not shared:** signing tokens (login/register, Keycloak adapter) stays in
+Sisques Account itself — this package only ever verifies.
+
+---
+
 ## RBAC (Tenant Permissions)
 
 `@sisques-labs/nestjs-kit/rbac` gives you the **mechanism** for enforcing
@@ -983,6 +1051,7 @@ permission type and your own map; this package gives you the guard and
 decorator that read them.
 
 ```typescript
+import { JwtAuthGuard } from '@sisques-labs/nestjs-kit/auth-client';
 import {
   createTenantPermissionGuard,
   RequiresTenantPermission,
