@@ -139,7 +139,7 @@ importers:
         specifier: 25.0.8
         version: 25.0.8(supports-color@8.1.1)(typescript@6.0.3)
       source-map-support:
-        specifier: ^0.5.21
+        specifier: 0.5.21
         version: 0.5.21
       ts-jest:
         specifier: ^29.1.0
