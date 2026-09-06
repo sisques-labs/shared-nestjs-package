@@ -58,6 +58,11 @@
       "import": "./dist/entrypoints/event-store.js",
       "types": "./dist/entrypoints/event-store.d.ts"
     },
+    "./rbac": {
+      "require": "./dist/entrypoints/rbac.js",
+      "import": "./dist/entrypoints/rbac.js",
+      "types": "./dist/entrypoints/rbac.d.ts"
+    },
     "./registered-enums": {
       "require": "./dist/shared/transport/graphql/enums/shared-registered-enums.graphql.js",
       "import": "./dist/shared/transport/graphql/enums/shared-registered-enums.graphql.js",
