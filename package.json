@@ -1,6 +1,6 @@
 {
   "name": "@sisques-labs/nestjs-kit",
-  "version": "1.8.0",
+  "version": "1.9.0-beta.1",
   "description": "NestJS Kit with DDD/CQRS base classes, value objects, repository abstractions, and GraphQL utilities",
   "author": "JSisques",
   "private": false,
@@ -57,6 +57,11 @@
       "require": "./dist/entrypoints/event-store.js",
       "import": "./dist/entrypoints/event-store.js",
       "types": "./dist/entrypoints/event-store.d.ts"
+    },
+    "./rbac": {
+      "require": "./dist/entrypoints/rbac.js",
+      "import": "./dist/entrypoints/rbac.js",
+      "types": "./dist/entrypoints/rbac.d.ts"
     },
     "./registered-enums": {
       "require": "./dist/shared/transport/graphql/enums/shared-registered-enums.graphql.js",

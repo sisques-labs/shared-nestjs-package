@@ -35,6 +35,7 @@
   - [Response DTOs](#response-dtos)
   - [Mappers](#mappers)
   - [Complexity Plugin](#complexity-plugin)
+- [RBAC (Tenant Permissions)](#rbac-tenant-permissions)
 - [Enums](#enums)
 
 ---
@@ -132,6 +133,7 @@ The package has dedicated entry points so importing the root never requires an o
 | `@sisques-labs/nestjs-kit/kafka` | `@kafkajs/confluent-schema-registry`, `@nestjs/axios` |
 | `@sisques-labs/nestjs-kit/messaging` | `kafkajs`, `@nestjs/config`, `@nestjs/cqrs` |
 | `@sisques-labs/nestjs-kit/event-store` | `@kurrent/kurrentdb-client`, `@nestjs/config`, `@nestjs/cqrs` |
+| `@sisques-labs/nestjs-kit/rbac` | `@nestjs/graphql` (only if you guard GraphQL resolvers), `express` |
 | `@sisques-labs/nestjs-kit/registered-enums` | Nothing extra — narrow export of the GraphQL enum registration for use before schema generation |
 
 > **Migrating from an earlier version?** MongoDB, TypeORM, GraphQL, and Kafka symbols used to be exported from the package root. Move those specific imports to the matching subpath above; everything else (value objects, base classes, domain enums, exceptions) still imports from `@sisques-labs/nestjs-kit` unchanged.
@@ -967,6 +969,78 @@ import { ComplexityPlugin } from '@sisques-labs/nestjs-kit/graphql';
 })
 export class GraphqlPluginsModule {}
 ```
+
+---
+
+## RBAC (Tenant Permissions)
+
+`@sisques-labs/nestjs-kit/rbac` gives you the **mechanism** for enforcing
+tenant-scoped permissions on top of a JWT that carries a `tenants: Array<{
+tenantId, role }>` claim (the shape `account-api` issues) — it never ships a
+permission enum or a role→permission mapping, because what each role should
+be allowed to do is inherently specific to your app. You bring your own
+permission type and your own map; this package gives you the guard and
+decorator that read them.
+
+```typescript
+import {
+  createTenantPermissionGuard,
+  RequiresTenantPermission,
+} from '@sisques-labs/nestjs-kit/rbac';
+
+// 1. Your own permissions
+enum GardenPermission {
+  VIEW_PLANTS = 'VIEW_PLANTS',
+  WATER_PLANT = 'WATER_PLANT',
+  DELETE_PLANT = 'DELETE_PLANT',
+  INVITE_GARDENER = 'INVITE_GARDENER',
+}
+
+// 2. Your own TenantRole -> Permission[] map (roles come from the JWT:
+// account-api's fixed OWNER / ADMIN / MEMBER — what each one unlocks in
+// your domain is entirely up to you)
+const GARDEN_ROLE_PERMISSIONS: Record<string, GardenPermission[]> = {
+  OWNER: [
+    GardenPermission.VIEW_PLANTS,
+    GardenPermission.WATER_PLANT,
+    GardenPermission.DELETE_PLANT,
+    GardenPermission.INVITE_GARDENER,
+  ],
+  ADMIN: [GardenPermission.VIEW_PLANTS, GardenPermission.WATER_PLANT, GardenPermission.INVITE_GARDENER],
+  MEMBER: [GardenPermission.VIEW_PLANTS, GardenPermission.WATER_PLANT],
+};
+
+// 3. Your own guard, built from the shared factory
+const GardenPermissionGuard = createTenantPermissionGuard({
+  rolePermissions: GARDEN_ROLE_PERMISSIONS,
+  // Optional — defaults to reading the REST `:tenantId` route param or a
+  // GraphQL `tenantId` / `input.tenantId` arg. Override when your app
+  // names the route param differently (e.g. `gardenId`):
+  // resolveTenantId: (context) => context.switchToHttp().getRequest().params.gardenId,
+});
+
+// 4. Wire it per endpoint, after your own JWT guard
+@Delete(':gardenId/plants/:plantId')
+@UseGuards(JwtAuthGuard, GardenPermissionGuard)
+@RequiresTenantPermission(GardenPermission.DELETE_PLANT)
+async deletePlant(@Param('gardenId') gardenId: string) {
+  /* ... */
+}
+```
+
+**How it works:** the guard reads `@RequiresTenantPermission()`'s metadata
+off the handler, resolves the target `tenantId`, finds the caller's
+membership for that tenant in `request.user.tenants` (already populated by
+your own JWT guard — this factory never verifies a token itself), and
+throws `ForbiddenException` if there's no membership or the role's
+permissions don't include the one required. Works for both REST controllers
+and GraphQL resolvers out of the box.
+
+**Not shared:** the permission enum and the role→permission map are always
+yours — copying that policy between apps (or worse, forcing every app onto
+one shared map) would couple unrelated domains together. Only the
+plumbing — reading the claim, resolving the tenant id, comparing against
+your map — is common enough to live here.
 
 ---
 

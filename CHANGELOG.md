@@ -1,3 +1,27 @@
+# [1.9.0-beta.1](https://github.com/sisques-labs/nestjs-kit/compare/v1.8.0...v1.9.0-beta.1) (2026-09-06)
+
+
+### Bug Fixes
+
+* **rbac:** use sisqueslabs namespace prefix for the metadata key ([d8823ee](https://github.com/sisques-labs/nestjs-kit/commit/d8823ee251d5bbfcd5d0b95303c7599930623b7d))
+
+
+### Features
+
+* **rbac:** add tenant-permission guard factory ([e67b17e](https://github.com/sisques-labs/nestjs-kit/commit/e67b17ec0ca2b3c145278982f60ded8aa248e266))
+
+# [1.9.0-alpha.1](https://github.com/sisques-labs/nestjs-kit/compare/v1.8.0...v1.9.0-alpha.1) (2026-09-06)
+
+
+### Bug Fixes
+
+* **rbac:** use sisqueslabs namespace prefix for the metadata key ([d8823ee](https://github.com/sisques-labs/nestjs-kit/commit/d8823ee251d5bbfcd5d0b95303c7599930623b7d))
+
+
+### Features
+
+* **rbac:** add tenant-permission guard factory ([e67b17e](https://github.com/sisques-labs/nestjs-kit/commit/e67b17ec0ca2b3c145278982f60ded8aa248e266))
+
 # [1.8.0](https://github.com/sisques-labs/nestjs-kit/compare/v1.7.0...v1.8.0) (2026-09-04)
 
 
