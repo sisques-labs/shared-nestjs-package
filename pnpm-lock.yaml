@@ -124,7 +124,7 @@ importers:
         specifier: 7.5.0
         version: 7.5.0
       prettier:
-        specifier: ^3.0.0
+        specifier: 3.9.6
         version: 3.9.6
       prom-client:
         specifier: ^15.1.3
